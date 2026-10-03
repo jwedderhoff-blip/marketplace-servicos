@@ -1,9 +1,8 @@
--- ============================================================
--- Marketplace de Serviços — Schema inicial
+﻿-- ============================================================
+-- Marketplace de ServiÃ§os â€” Schema inicial
 -- ============================================================
 
--- Extensões necessárias
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- ExtensÃµes necessÃ¡rias
 CREATE EXTENSION IF NOT EXISTS "postgis";
 CREATE EXTENSION IF NOT EXISTS "vector";
 
@@ -38,7 +37,7 @@ CREATE TABLE users (
 -- CONSENTIMENTO LGPD
 -- ============================================================
 CREATE TABLE consent_logs (
-  id          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     uuid REFERENCES users(id) ON DELETE CASCADE,
   version     text NOT NULL,         -- ex: "1.0", "1.1"
   accepted_at timestamptz NOT NULL DEFAULT now(),
@@ -50,7 +49,7 @@ CREATE TABLE consent_logs (
 -- PERFIL DO PRESTADOR
 -- ============================================================
 CREATE TABLE provider_profiles (
-  id                   uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id              uuid UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   bio                  text,
   avg_rating           numeric(2,1) NOT NULL DEFAULT 0,
@@ -79,10 +78,10 @@ CREATE INDEX idx_provider_profiles_availability
   WHERE availability_status != 'unavailable';
 
 -- ============================================================
--- CATEGORIAS (árvore hierárquica)
+-- CATEGORIAS (Ã¡rvore hierÃ¡rquica)
 -- ============================================================
 CREATE TABLE categories (
-  id            uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name          text NOT NULL,
   slug          text UNIQUE NOT NULL,
   parent_id     uuid REFERENCES categories(id),
@@ -95,10 +94,10 @@ CREATE INDEX idx_categories_parent ON categories (parent_id);
 CREATE INDEX idx_categories_slug ON categories (slug);
 
 -- ============================================================
--- TAGS DE SERVIÇO
+-- TAGS DE SERVIÃ‡O
 -- ============================================================
 CREATE TABLE tags (
-  id          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL,
   slug        text UNIQUE NOT NULL,
   category_id uuid REFERENCES categories(id),
@@ -109,10 +108,10 @@ CREATE INDEX idx_tags_category ON tags (category_id);
 CREATE INDEX idx_tags_slug ON tags (slug);
 
 -- ============================================================
--- SERVIÇOS OFERECIDOS
+-- SERVIÃ‡OS OFERECIDOS
 -- ============================================================
 CREATE TABLE provider_services (
-  id                 uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   provider_id        uuid REFERENCES provider_profiles(id) ON DELETE CASCADE,
   tag_id             uuid REFERENCES tags(id),
   custom_description text,
@@ -128,7 +127,7 @@ CREATE INDEX idx_provider_services_tag ON provider_services (tag_id);
 -- AGENDA SEMANAL DO PRESTADOR
 -- ============================================================
 CREATE TABLE provider_schedules (
-  id          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   provider_id uuid REFERENCES provider_profiles(id) ON DELETE CASCADE,
   day_of_week int NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
   start_time  time NOT NULL,
@@ -137,10 +136,10 @@ CREATE TABLE provider_schedules (
 );
 
 -- ============================================================
--- SOLICITAÇÕES DE SERVIÇO
+-- SOLICITAÃ‡Ã•ES DE SERVIÃ‡O
 -- ============================================================
 CREATE TABLE service_requests (
-  id                   uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id            uuid REFERENCES users(id),
   raw_input            text,
   matched_category_id  uuid REFERENCES categories(id),
@@ -163,7 +162,7 @@ CREATE INDEX idx_service_requests_location
 -- MATCHES
 -- ============================================================
 CREATE TABLE request_matches (
-  id          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   request_id  uuid REFERENCES service_requests(id) ON DELETE CASCADE,
   provider_id uuid REFERENCES provider_profiles(id),
   match_score numeric(5,2) NOT NULL DEFAULT 0,
@@ -181,7 +180,7 @@ CREATE INDEX idx_request_matches_provider ON request_matches (provider_id);
 -- MENSAGENS (CHAT)
 -- ============================================================
 CREATE TABLE messages (
-  id         uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   request_id uuid REFERENCES service_requests(id) ON DELETE CASCADE,
   sender_id  uuid REFERENCES users(id),
   content    text NOT NULL,
@@ -192,10 +191,10 @@ CREATE TABLE messages (
 CREATE INDEX idx_messages_request ON messages (request_id, created_at);
 
 -- ============================================================
--- AVALIAÇÕES
+-- AVALIAÃ‡Ã•ES
 -- ============================================================
 CREATE TABLE reviews (
-  id          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   request_id  uuid REFERENCES service_requests(id) UNIQUE,
   reviewer_id uuid REFERENCES users(id),
   reviewee_id uuid REFERENCES users(id),
@@ -208,7 +207,7 @@ CREATE TABLE reviews (
 CREATE INDEX idx_reviews_reviewee ON reviews (reviewee_id);
 
 -- ============================================================
--- FUNÇÃO: atualizar avg_rating automaticamente
+-- FUNÃ‡ÃƒO: atualizar avg_rating automaticamente
 -- ============================================================
 CREATE OR REPLACE FUNCTION update_provider_rating()
 RETURNS TRIGGER AS $$
@@ -238,13 +237,13 @@ CREATE TRIGGER trg_update_provider_rating
   FOR EACH ROW EXECUTE FUNCTION update_provider_rating();
 
 -- ============================================================
--- FUNÇÃO: soft delete (LGPD — direito ao esquecimento)
+-- FUNÃ‡ÃƒO: soft delete (LGPD â€” direito ao esquecimento)
 -- ============================================================
 CREATE OR REPLACE FUNCTION anonymize_user(p_user_id uuid)
 RETURNS void AS $$
 BEGIN
   UPDATE users SET
-    name       = 'Usuário removido',
+    name       = 'UsuÃ¡rio removido',
     email      = 'removed_' || p_user_id || '@deleted.invalid',
     avatar_url = NULL,
     phone      = NULL,
@@ -266,7 +265,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================
--- FUNÇÃO: busca geoespacial de prestadores
+-- FUNÃ‡ÃƒO: busca geoespacial de prestadores
 -- ============================================================
 CREATE OR REPLACE FUNCTION find_providers_nearby(
   lat              double precision,
