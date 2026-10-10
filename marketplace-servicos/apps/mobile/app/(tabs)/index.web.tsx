@@ -30,350 +30,575 @@ const CATEGORY_FILTERS = [
 ];
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* Expo Web sets body/html overflow:hidden — make root the scroll container */
 html, body { overflow: hidden !important; height: 100%; }
 
-.praca-root {
-  height: 100vh;
-  overflow-y: auto;
-  background: #080613;
-  color: #EDE9F8;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+:root {
+  --bg: #06040F;
+  --surface: #0E0A1E;
+  --surface2: #160F2A;
+  --border: rgba(108,61,224,0.15);
+  --purple: #6C3DE0;
+  --purple-light: #8B5CF6;
+  --purple-glow: rgba(108,61,224,0.25);
+  --gold: #F59E0B;
+  --gold-light: #FCD34D;
+  --green: #10B981;
+  --text: #EDE9F8;
+  --text-2: #9B8EC0;
+  --text-3: #5A5180;
+  --radius: 20px;
 }
 
-/* ── HEADER ── */
-.praca-header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  height: 68px;
-  background: rgba(8,6,19,0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(108,61,224,0.12);
+.platz-root {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+/* ─── HEADER ─── */
+.platz-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  height: 64px;
+  background: rgba(6,4,15,0.85);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 48px;
 }
-.praca-logo {
+.platz-logo {
   display: flex; align-items: center; gap: 10px;
-  font-weight: 800; font-size: 18px; letter-spacing: -0.3px;
-  color: #fff; text-decoration: none;
+  font-weight: 900; font-size: 19px; letter-spacing: -0.5px;
+  color: #fff; text-decoration: none; cursor: pointer;
 }
-.praca-logo-icon {
-  width: 32px; height: 32px; border-radius: 10px;
-  background: linear-gradient(135deg, #6C3DE0, #8B5CF6);
+.platz-logo-mark {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #6C3DE0 0%, #8B5CF6 60%, #F59E0B 100%);
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
+  font-size: 17px; box-shadow: 0 4px 16px rgba(108,61,224,0.5);
 }
-.praca-logo span { color: #A78BFA; }
-.praca-nav { display: flex; align-items: center; gap: 8px; }
-.praca-nav a {
-  padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
-  color: #9B8EC0; text-decoration: none; transition: all .2s;
-  cursor: pointer; border: none; background: none;
+.platz-logo-name { color: #fff; }
+.platz-logo-name span { color: #A78BFA; }
+.platz-nav { display: flex; align-items: center; gap: 4px; }
+.platz-nav-link {
+  padding: 7px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  cursor: pointer; border: none; background: none; font-family: inherit;
+  transition: color .2s, background .2s;
 }
-.praca-nav a:hover { color: #fff; background: rgba(108,61,224,0.15); }
-.praca-nav .btn-primary {
-  background: linear-gradient(135deg, #6C3DE0, #8B5CF6);
-  color: #fff; padding: 8px 20px; border-radius: 8px;
-  font-weight: 600; font-size: 14px; cursor: pointer; border: none;
-  transition: opacity .2s;
+.platz-nav-link:hover { color: #fff; background: rgba(108,61,224,0.12); }
+.platz-nav-cta {
+  background: linear-gradient(135deg, var(--purple), var(--purple-light));
+  color: #fff; padding: 8px 18px; border-radius: 10px;
+  font-weight: 700; font-size: 13px; cursor: pointer; border: none;
+  font-family: inherit; transition: opacity .2s, box-shadow .2s;
+  box-shadow: 0 4px 14px rgba(108,61,224,0.4);
 }
-.praca-nav .btn-primary:hover { opacity: .85; }
-.praca-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, #6C3DE0, #F59E0B);
+.platz-nav-cta:hover { opacity: .88; box-shadow: 0 6px 20px rgba(108,61,224,0.55); }
+.platz-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--gold));
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; color: #fff;
-  cursor: pointer; border: 2px solid rgba(108,61,224,0.4);
+  font-weight: 800; font-size: 13px; color: #fff;
+  cursor: pointer; border: 2px solid rgba(108,61,224,0.35);
   transition: border-color .2s;
 }
-.praca-avatar:hover { border-color: #6C3DE0; }
+.platz-avatar:hover { border-color: var(--purple); }
 
-/* ── HERO ── */
-.praca-hero {
-  padding: 148px 48px 80px;
-  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,61,224,0.28) 0%, transparent 70%);
-  text-align: center;
-  position: relative; overflow: hidden;
+/* ─── HERO ─── */
+.platz-hero {
+  padding: 140px 48px 80px;
+  position: relative; overflow: hidden; text-align: center;
 }
-.praca-hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(rgba(108,61,224,0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
-  pointer-events: none;
+.platz-hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -5%, rgba(108,61,224,0.32) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(245,158,11,0.07) 0%, transparent 60%);
 }
-.praca-hero-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(108,61,224,0.15); border: 1px solid rgba(108,61,224,0.3);
-  border-radius: 100px; padding: 6px 14px; font-size: 12px; font-weight: 600;
-  color: #A78BFA; letter-spacing: 0.3px; margin-bottom: 28px;
+.platz-hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(108,61,224,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108,61,224,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
 }
-.praca-hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: #A78BFA; animation: pulse-dot 2s infinite; }
-@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
-.praca-hero h1 {
+.platz-hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(108,61,224,0.12); border: 1px solid rgba(108,61,224,0.28);
+  border-radius: 100px; padding: 7px 16px;
+  font-size: 12px; font-weight: 700; color: #A78BFA;
+  letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 32px;
+  position: relative;
+}
+.platz-hero-badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-live 2s infinite;
+}
+@keyframes pulse-live {
+  0%,100% { opacity:1; transform:scale(1); box-shadow:0 0 8px var(--green); }
+  50% { opacity:.7; transform:scale(1.3); box-shadow:0 0 14px var(--green); }
+}
+.platz-hero h1 {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(40px, 5vw, 68px);
-  font-weight: 600; line-height: 1.1; letter-spacing: -1px;
-  color: #fff; margin-bottom: 20px;
+  font-size: clamp(42px, 5.5vw, 72px);
+  font-weight: 700; line-height: 1.08; letter-spacing: -1.5px;
+  color: #fff; margin-bottom: 22px; position: relative;
 }
-.praca-hero h1 em {
+.platz-hero h1 em {
   font-style: italic;
-  background: linear-gradient(90deg, #A78BFA, #F59E0B);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  background: linear-gradient(90deg, #C4B5FD 0%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
-.praca-hero p {
-  font-size: 18px; color: #9B8EC0; max-width: 520px; margin: 0 auto 40px;
-  line-height: 1.6;
+.platz-hero-sub {
+  font-size: 18px; color: var(--text-2); max-width: 560px;
+  margin: 0 auto 44px; line-height: 1.65; position: relative;
 }
-.praca-search-wrap {
-  max-width: 600px; margin: 0 auto 40px;
+.platz-search-wrap {
+  max-width: 620px; margin: 0 auto 52px;
   display: flex; gap: 0;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(108,61,224,0.25);
-  border-radius: 16px; padding: 6px;
-  backdrop-filter: blur(12px);
-  transition: border-color .2s;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(108,61,224,0.3);
+  border-radius: 18px; padding: 6px;
+  backdrop-filter: blur(16px);
+  transition: border-color .25s, box-shadow .25s;
+  position: relative;
 }
-.praca-search-wrap:focus-within { border-color: rgba(108,61,224,0.6); }
-.praca-search-wrap input {
+.platz-search-wrap:focus-within {
+  border-color: rgba(108,61,224,0.7);
+  box-shadow: 0 0 0 4px rgba(108,61,224,0.1);
+}
+.platz-search-input {
   flex: 1; background: none; border: none; outline: none;
-  padding: 12px 16px; font-size: 15px; color: #fff;
-  font-family: inherit;
+  padding: 13px 18px; font-size: 15px; color: #fff; font-family: inherit;
 }
-.praca-search-wrap input::placeholder { color: #6B60A0; }
-.praca-search-btn {
-  background: linear-gradient(135deg, #6C3DE0, #8B5CF6);
-  border: none; border-radius: 10px; padding: 12px 24px;
-  color: #fff; font-weight: 600; font-size: 14px; cursor: pointer;
-  transition: opacity .2s; white-space: nowrap;
+.platz-search-input::placeholder { color: #4A4170; }
+.platz-search-btn {
+  background: linear-gradient(135deg, var(--purple), var(--purple-light));
+  border: none; border-radius: 13px; padding: 13px 28px;
+  color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+  transition: opacity .2s; white-space: nowrap; font-family: inherit;
+  box-shadow: 0 4px 14px rgba(108,61,224,0.4);
 }
-.praca-search-btn:hover { opacity: .85; }
-.praca-hero-stats {
-  display: flex; align-items: center; justify-content: center; gap: 32px;
-  flex-wrap: wrap;
+.platz-search-btn:hover { opacity: .85; }
+.platz-hero-trust {
+  display: flex; align-items: center; justify-content: center;
+  gap: 28px; flex-wrap: wrap; position: relative;
 }
-.praca-stat { display: flex; flex-direction: column; align-items: center; }
-.praca-stat strong { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
-.praca-stat span { font-size: 12px; color: #6B60A0; font-weight: 500; margin-top: 2px; }
-.praca-stat-divider { width: 1px; height: 36px; background: rgba(108,61,224,0.2); }
+.platz-hero-trust-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+}
+.platz-hero-trust-item strong { color: #fff; }
+.platz-trust-divider { width: 1px; height: 16px; background: var(--border); }
 
-/* ── FILTERS ── */
-.praca-filters-wrap {
-  position: sticky; top: 68px; z-index: 100;
-  background: rgba(8,6,19,0.9); backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  padding: 16px 48px;
+/* ─── PILLARS ─── */
+.platz-pillars {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
-.praca-filters {
+.platz-pillar {
+  background: var(--surface);
+  padding: 32px 36px;
+  display: flex; align-items: flex-start; gap: 18px;
+  transition: background .2s;
+}
+.platz-pillar:hover { background: var(--surface2); }
+.platz-pillar-icon {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.platz-pillar-icon.purple { background: rgba(108,61,224,0.15); border: 1px solid rgba(108,61,224,0.2); }
+.platz-pillar-icon.gold { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.2); }
+.platz-pillar-icon.green { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.2); }
+.platz-pillar-text h3 { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 5px; }
+.platz-pillar-text p { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+
+/* ─── STATS ─── */
+.platz-stats {
+  padding: 64px 48px;
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 2px; background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.platz-stat-box {
+  background: var(--bg);
+  padding: 36px 32px;
+  text-align: center;
+}
+.platz-stat-box strong {
+  display: block;
+  font-size: 44px; font-weight: 900; letter-spacing: -2px;
+  background: linear-gradient(135deg, #C4B5FD 0%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 6px;
+}
+.platz-stat-box span { font-size: 13px; color: var(--text-2); font-weight: 600; }
+
+/* ─── FILTERS ─── */
+.platz-filters-wrap {
+  position: sticky; top: 64px; z-index: 200;
+  background: rgba(6,4,15,0.92); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 48px;
+}
+.platz-filters {
   display: flex; gap: 8px; overflow-x: auto;
   scrollbar-width: none; -ms-overflow-style: none;
 }
-.praca-filters::-webkit-scrollbar { display: none; }
-.praca-filter-chip {
-  display: flex; align-items: center; gap: 6px;
+.platz-filters::-webkit-scrollbar { display: none; }
+.platz-filter-chip {
+  display: flex; align-items: center; gap: 7px;
   padding: 8px 18px; border-radius: 100px;
-  border: 1px solid rgba(108,61,224,0.2);
-  background: rgba(108,61,224,0.06);
-  color: #9B8EC0; font-size: 13px; font-weight: 600;
+  border: 1.5px solid rgba(108,61,224,0.18);
+  background: transparent;
+  color: var(--text-2); font-size: 13px; font-weight: 700;
   cursor: pointer; white-space: nowrap;
-  transition: all .2s;
+  transition: all .2s; font-family: inherit;
 }
-.praca-filter-chip:hover { border-color: rgba(108,61,224,0.5); color: #C4B5FD; }
-.praca-filter-chip.active {
-  background: linear-gradient(135deg, #6C3DE0, #8B5CF6);
+.platz-filter-chip:hover { border-color: rgba(108,61,224,0.45); color: #C4B5FD; }
+.platz-filter-chip.active {
+  background: linear-gradient(135deg, var(--purple), var(--purple-light));
   border-color: transparent; color: #fff;
+  box-shadow: 0 4px 14px rgba(108,61,224,0.35);
 }
 
-/* ── VIEW TOGGLE ── */
-.praca-toggle-wrap {
-  padding: 24px 48px 0;
+/* ─── SECTION ─── */
+.platz-section { padding: 56px 0 0; }
+.platz-section-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 28px; padding: 0 48px;
+}
+.platz-section-title {
+  font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+.platz-section-subtitle {
+  font-size: 14px; color: var(--text-2); margin-top: 4px; font-weight: 500;
+}
+.platz-section-count {
+  font-size: 13px; color: var(--text-3); font-weight: 600;
+  padding: 5px 12px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 20px;
+}
+
+/* ─── TOGGLE ─── */
+.platz-toggle-wrap {
+  padding: 0 48px 24px;
   display: flex; align-items: center; gap: 8px; justify-content: flex-end;
 }
-.praca-view-btn {
-  display: flex; align-items: center; gap: 6px;
+.platz-view-btn {
+  display: flex; align-items: center; gap: 7px;
   padding: 8px 18px; border-radius: 20px;
-  background: rgba(108,61,224,0.08);
-  border: 1px solid rgba(108,61,224,0.2);
-  color: #9B8EC0; font-size: 13px; font-weight: 600;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text-2); font-size: 13px; font-weight: 700;
   cursor: pointer; transition: all .2s; font-family: inherit;
 }
-.praca-view-btn:hover { border-color: rgba(108,61,224,0.4); color: #C4B5FD; }
-.praca-view-btn.active {
-  background: linear-gradient(135deg, #6C3DE0, #8B5CF6);
+.platz-view-btn:hover { border-color: rgba(108,61,224,0.4); color: #C4B5FD; }
+.platz-view-btn.active {
+  background: linear-gradient(135deg, var(--purple), var(--purple-light));
   border-color: transparent; color: #fff;
+  box-shadow: 0 4px 14px rgba(108,61,224,0.3);
 }
 
-/* ── SECTIONS ── */
-.praca-section {
-  padding: 32px 0 0;
-}
-.praca-section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 20px; padding: 0 48px;
-}
-.praca-section-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
-.praca-section-count { font-size: 13px; color: #6B60A0; font-weight: 500; }
-
-/* ── CAROUSEL ── */
-.praca-carousel {
+/* ─── CAROUSEL ─── */
+.platz-carousel {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  gap: 16px;
-  padding: 0 48px 20px;
+  scrollbar-width: none; -ms-overflow-style: none;
+  gap: 20px; padding: 4px 48px 24px;
 }
-.praca-carousel::-webkit-scrollbar { display: none; }
-.praca-carousel .praca-card {
-  flex: 0 0 280px;
-  scroll-snap-align: start;
-}
+.platz-carousel::-webkit-scrollbar { display: none; }
+.platz-carousel .platz-card { flex: 0 0 300px; scroll-snap-align: start; }
 
-/* ── GRID ── */
-.praca-grid {
+/* ─── GRID ─── */
+.platz-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 0 48px;
+  gap: 20px; padding: 0 48px;
 }
 
-/* ── PROVIDER CARD ── */
-.praca-card {
-  background: #100C26;
-  border: 1px solid rgba(108,61,224,0.12);
-  border-radius: 20px; overflow: hidden;
-  cursor: pointer;
-  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .25s;
-  text-decoration: none; color: inherit; display: block;
+/* ─── PROVIDER CARD ─── */
+.platz-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  cursor: pointer; display: block; text-decoration: none; color: inherit;
+  transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s, border-color .28s;
+  position: relative;
 }
-.praca-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 60px rgba(108,61,224,0.2);
-  border-color: rgba(108,61,224,0.35);
+.platz-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 28px 60px rgba(108,61,224,0.22), 0 8px 20px rgba(0,0,0,0.4);
+  border-color: rgba(108,61,224,0.4);
 }
-.praca-card-photo {
-  position: relative; height: 180px; overflow: hidden;
+.platz-card-photo {
+  position: relative; height: 190px; overflow: hidden;
   background: linear-gradient(135deg, #1A1035, #2D1B69);
 }
-.praca-card-photo img {
+.platz-card-photo img {
   width: 100%; height: 100%; object-fit: cover;
-  transition: transform .4s ease;
+  transition: transform .45s ease;
 }
-.praca-card:hover .praca-card-photo img { transform: scale(1.06); }
-.praca-card-photo-overlay {
+.platz-card:hover .platz-card-photo img { transform: scale(1.07); }
+.platz-card-photo-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(16,12,38,0.9) 100%);
+  background: linear-gradient(to bottom, transparent 35%, rgba(14,10,30,0.92) 100%);
 }
-.praca-card-badge {
+.platz-card-badge {
   position: absolute; top: 12px; left: 12px;
   display: flex; align-items: center; gap: 5px;
   padding: 4px 10px; border-radius: 100px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.3px;
+  backdrop-filter: blur(8px);
 }
-.praca-card-badge.now { background: rgba(16,185,129,0.9); color: #fff; }
-.praca-card-badge.today { background: rgba(245,158,11,0.9); color: #fff; }
-.praca-card-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-.praca-card-verified {
+.platz-card-badge.now { background: rgba(16,185,129,0.88); color: #fff; }
+.platz-card-badge.today { background: rgba(245,158,11,0.88); color: #fff; }
+.platz-card-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse-live 1.8s infinite; }
+.platz-card-verified {
   position: absolute; top: 12px; right: 12px;
-  background: rgba(108,61,224,0.85); backdrop-filter: blur(8px);
-  border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 700; color: #fff;
+  background: rgba(108,61,224,0.88); backdrop-filter: blur(8px);
+  border-radius: 8px; padding: 4px 9px;
+  font-size: 11px; font-weight: 800; color: #fff;
 }
-.praca-card-avatar-wrap {
-  position: absolute; bottom: -22px; left: 16px;
-}
-.praca-card-avatar {
-  width: 52px; height: 52px; border-radius: 50%;
-  border: 3px solid #100C26;
-  background: linear-gradient(135deg, #6C3DE0, #F59E0B);
+.platz-card-avatar-wrap { position: absolute; bottom: -24px; left: 16px; }
+.platz-card-avatar {
+  width: 54px; height: 54px; border-radius: 50%;
+  border: 3px solid var(--surface);
+  background: linear-gradient(135deg, var(--purple), var(--gold));
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 800; color: #fff;
-  overflow: hidden;
+  font-size: 21px; font-weight: 900; color: #fff; overflow: hidden;
 }
-.praca-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.praca-card-body { padding: 32px 16px 16px; }
-.praca-card-name {
-  font-size: 15px; font-weight: 700; color: #EDE9F8; margin-bottom: 2px;
+.platz-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.platz-card-body { padding: 34px 18px 18px; }
+.platz-card-name {
+  font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.praca-card-specialty { font-size: 12px; color: #6B60A0; font-weight: 500; margin-bottom: 12px; }
-.praca-card-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-.praca-card-rating {
+.platz-card-specialty {
+  font-size: 12px; color: var(--text-2); font-weight: 500; margin-bottom: 14px;
+}
+.platz-card-meta {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.platz-card-rating {
   display: flex; align-items: center; gap: 4px;
-  font-size: 13px; font-weight: 700; color: #F59E0B;
+  font-size: 13px; font-weight: 800; color: var(--gold);
 }
-.praca-card-rating span { color: #9B8EC0; font-weight: 400; font-size: 11px; }
-.praca-card-distance { font-size: 12px; color: #6B60A0; display: flex; align-items: center; gap: 3px; }
-.praca-card-price {
-  background: rgba(108,61,224,0.12); border: 1px solid rgba(108,61,224,0.2);
+.platz-card-rating-count { color: var(--text-2); font-weight: 400; font-size: 11px; }
+.platz-card-distance { font-size: 12px; color: var(--text-2); }
+.platz-card-price {
+  background: rgba(108,61,224,0.12); border: 1px solid rgba(108,61,224,0.22);
   border-radius: 8px; padding: 4px 10px;
-  font-size: 11px; font-weight: 700; color: #A78BFA;
+  font-size: 11px; font-weight: 800; color: #A78BFA;
 }
-.praca-card-footer {
+.platz-card-footer {
   display: flex; align-items: center; justify-content: space-between;
   padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);
 }
-.praca-card-cta {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 13px; font-weight: 700; color: #8B5CF6;
-  transition: gap .2s;
+.platz-card-cta {
+  font-size: 13px; font-weight: 800; color: var(--purple-light);
+  display: flex; align-items: center; gap: 4px; transition: gap .2s;
 }
-.praca-card:hover .praca-card-cta { gap: 8px; }
+.platz-card:hover .platz-card-cta { gap: 8px; }
 
-/* ── LOADING ── */
-.praca-loading {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 300px; gap: 16px; color: #6B60A0;
+/* ─── HOW IT WORKS ─── */
+.platz-how {
+  padding: 80px 48px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 56px;
 }
-.praca-spinner {
-  width: 40px; height: 40px; border-radius: 50%;
+.platz-how-header { text-align: center; margin-bottom: 56px; }
+.platz-how-header h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(28px, 3vw, 40px); font-weight: 700;
+  color: #fff; letter-spacing: -0.5px; margin-bottom: 12px;
+}
+.platz-how-header p { font-size: 16px; color: var(--text-2); }
+.platz-how-steps {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 32px; max-width: 900px; margin: 0 auto;
+}
+.platz-how-step { text-align: center; position: relative; }
+.platz-how-step:not(:last-child)::after {
+  content: '→';
+  position: absolute; top: 26px; right: -24px;
+  font-size: 22px; color: var(--text-3);
+}
+.platz-how-step-num {
+  width: 56px; height: 56px; border-radius: 18px;
+  background: linear-gradient(135deg, rgba(108,61,224,0.2), rgba(139,92,246,0.2));
+  border: 1.5px solid rgba(108,61,224,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin: 0 auto 20px;
+}
+.platz-how-step h3 { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.platz-how-step p { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+/* ─── FOR PROVIDERS ─── */
+.platz-providers-section {
+  padding: 80px 48px;
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #0E0A1E 0%, #160F2A 100%);
+  border-bottom: 1px solid var(--border);
+}
+.platz-providers-section::before {
+  content: '';
+  position: absolute; top: -60%; right: -10%;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(108,61,224,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.platz-providers-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 64px; align-items: center;
+}
+.platz-providers-left h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(30px, 3.5vw, 46px); font-weight: 700;
+  color: #fff; letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 16px;
+}
+.platz-providers-left h2 em {
+  font-style: italic;
+  background: linear-gradient(90deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.platz-providers-left p {
+  font-size: 16px; color: var(--text-2); line-height: 1.65; margin-bottom: 32px;
+}
+.platz-providers-benefits { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+.platz-benefit {
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.platz-benefit-check {
+  width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+  background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--green); margin-top: 2px;
+}
+.platz-benefit-text { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.5; }
+.platz-benefit-text strong { color: #fff; font-weight: 700; }
+.platz-providers-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--gold) 0%, #D97706 100%);
+  color: #000; padding: 14px 28px; border-radius: 14px;
+  font-weight: 900; font-size: 15px; cursor: pointer; border: none;
+  font-family: inherit; transition: opacity .2s, box-shadow .2s;
+  box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+}
+.platz-providers-cta:hover { opacity: .88; box-shadow: 0 8px 28px rgba(245,158,11,0.55); }
+.platz-earnings-card {
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid rgba(108,61,224,0.2);
+  border-radius: 24px; padding: 36px;
+  backdrop-filter: blur(12px);
+}
+.platz-earnings-card h3 {
+  font-size: 15px; font-weight: 700; color: var(--text-2); margin-bottom: 24px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.platz-earnings-number {
+  font-size: 60px; font-weight: 900; letter-spacing: -3px;
+  background: linear-gradient(90deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; line-height: 1; margin-bottom: 6px;
+}
+.platz-earnings-label { font-size: 14px; color: var(--text-2); margin-bottom: 28px; }
+.platz-earnings-rows { display: flex; flex-direction: column; gap: 14px; }
+.platz-earnings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-radius: 12px;
+  background: rgba(108,61,224,0.07); border: 1px solid rgba(108,61,224,0.12);
+}
+.platz-earnings-row span { font-size: 13px; color: var(--text-2); font-weight: 500; }
+.platz-earnings-row strong { font-size: 14px; color: #fff; font-weight: 800; }
+
+/* ─── LOADING / EMPTY ─── */
+.platz-loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 280px; gap: 16px; color: var(--text-2);
+}
+.platz-spinner {
+  width: 42px; height: 42px; border-radius: 50%;
   border: 3px solid rgba(108,61,224,0.2);
-  border-top-color: #6C3DE0;
-  animation: spin .8s linear infinite;
+  border-top-color: var(--purple);
+  animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── EMPTY ── */
-.praca-empty {
+.platz-empty {
   text-align: center; padding: 80px 20px;
-  color: #6B60A0; font-size: 15px;
+  color: var(--text-2); font-size: 15px;
 }
-.praca-empty-icon { font-size: 48px; margin-bottom: 16px; }
+.platz-empty-icon { font-size: 48px; margin-bottom: 16px; }
 
-/* ── FOOTER ── */
-.praca-footer {
-  margin-top: 80px; padding: 40px 48px;
-  border-top: 1px solid rgba(255,255,255,0.05);
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+/* ─── FOOTER ─── */
+.platz-footer {
+  margin-top: 80px; padding: 48px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
 }
-.praca-footer-logo { font-size: 15px; font-weight: 700; color: #4B4470; }
-.praca-footer-logo span { color: #6C3DE0; }
-.praca-footer-links { display: flex; gap: 24px; }
-.praca-footer-links a {
-  font-size: 13px; color: #4B4470; text-decoration: none;
-  transition: color .2s; cursor: pointer;
+.platz-footer-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
 }
-.praca-footer-links a:hover { color: #9B8EC0; }
+.platz-footer-brand { font-size: 14px; color: var(--text-3); font-weight: 600; }
+.platz-footer-brand span { color: var(--purple-light); }
+.platz-footer-tagline { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+.platz-footer-links { display: flex; gap: 28px; }
+.platz-footer-link {
+  font-size: 13px; color: var(--text-3); cursor: pointer;
+  border: none; background: none; font-family: inherit;
+  transition: color .2s;
+}
+.platz-footer-link:hover { color: var(--text-2); }
+.platz-footer-copy { font-size: 12px; color: var(--text-3); }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .praca-header { padding: 0 20px; }
-  .praca-hero { padding: 120px 20px 60px; }
-  .praca-stat-divider { display: none; }
-  .praca-filters-wrap { padding: 12px 20px; }
-  .praca-toggle-wrap { padding: 16px 20px 0; }
-  .praca-section-header { padding: 0 20px; }
-  .praca-carousel { padding: 0 20px 16px; }
-  .praca-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; padding: 0 20px; }
-  .praca-footer { padding: 32px 20px; flex-direction: column; }
-  .praca-nav .praca-nav-link { display: none; }
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .platz-header { padding: 0 20px; }
+  .platz-hero { padding: 110px 20px 60px; }
+  .platz-pillars { grid-template-columns: 1fr; }
+  .platz-stats { grid-template-columns: repeat(2,1fr); padding: 0; }
+  .platz-stat-box { padding: 28px 20px; }
+  .platz-filters-wrap { padding: 12px 20px; }
+  .platz-section-header { padding: 0 20px; }
+  .platz-carousel { padding: 4px 20px 20px; gap: 14px; }
+  .platz-carousel .platz-card { flex: 0 0 260px; }
+  .platz-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); padding: 0 20px; gap: 14px; }
+  .platz-toggle-wrap { padding: 0 20px 20px; }
+  .platz-how { padding: 56px 20px; }
+  .platz-how-steps { grid-template-columns: 1fr; gap: 28px; }
+  .platz-how-step:not(:last-child)::after { display: none; }
+  .platz-providers-section { padding: 56px 20px; }
+  .platz-providers-inner { grid-template-columns: 1fr; gap: 40px; }
+  .platz-footer { padding: 36px 20px; }
+  .platz-footer-inner { flex-direction: column; align-items: flex-start; }
+  .platz-nav-link { display: none; }
 }
 `;
 
@@ -385,52 +610,44 @@ export default function PracaVirtualWeb() {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
   const [featured, setFeatured] = useState<any[]>([]);
-
   const featuredRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const style = document.createElement("style");
     style.textContent = CSS;
     document.head.appendChild(style);
-    return () => document.head.removeChild(style);
+    return () => { try { document.head.removeChild(style); } catch {} };
   }, []);
 
   useEffect(() => {
     setLoading(true);
     supabase.rpc("find_providers_nearby", {
-      lat: SAO_PAULO.lat,
-      lng: SAO_PAULO.lng,
-      radius_km: 50,
-      filter_category: selectedCategory,
-      result_limit: 30,
+      lat: SAO_PAULO.lat, lng: SAO_PAULO.lng,
+      radius_km: 50, filter_category: selectedCategory, result_limit: 30,
     }).then(({ data }) => {
       setProviders(data ?? []);
       setLoading(false);
     });
   }, [selectedCategory]);
 
-  // Embaralha os prestadores para o carrossel de destaques ao carregar
   useEffect(() => {
     if (providers.length === 0) return;
     const shuffled = [...providers].sort(() => Math.random() - 0.5);
     setFeatured(shuffled.slice(0, 8));
   }, [providers]);
 
-  // Auto-scroll do carrossel de destaques a cada 3 segundos
   useEffect(() => {
     if (viewMode !== "carousel" || loading) return;
     const el = featuredRef.current;
     if (!el) return;
-    const STEP = 296; // 280px card + 16px gap
+    const STEP = 320;
     const timer = setInterval(() => {
       const max = el.scrollWidth - el.clientWidth;
       if (max <= 0) return;
-      if (el.scrollLeft >= max - 1) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        el.scrollBy({ left: STEP, behavior: "smooth" });
-      }
-    }, 3000);
+      el.scrollLeft >= max - 1
+        ? el.scrollTo({ left: 0, behavior: "smooth" })
+        : el.scrollBy({ left: STEP, behavior: "smooth" });
+    }, 3500);
     return () => clearInterval(timer);
   }, [viewMode, loading, featured.length]);
 
@@ -454,64 +671,54 @@ export default function PracaVirtualWeb() {
     return SERVICE_PHOTOS[slug] ?? "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=75";
   };
 
+  const handleCardClick = (id: string) => { window.location.href = `/provider/${id}`; };
   const getInitial = (name: string) => name?.charAt(0)?.toUpperCase() ?? "?";
-
-  const handleCardClick = (providerId: string) => {
-    window.location.href = `/provider/${providerId}`;
-  };
-
   const userName = user?.user_metadata?.full_name ?? user?.email ?? "";
+  const availableNow = providers.filter((p) => p.availability_status === "available_now").length;
 
   const renderCard = (p: any) => {
     const svc = p.services?.[0];
     const isNow = p.availability_status === "available_now";
     const isToday = p.availability_status === "available_today";
     return (
-      <div
-        key={p.provider_id}
-        className="praca-card"
-        onClick={() => handleCardClick(p.provider_id)}
-      >
-        <div className="praca-card-photo">
+      <div key={p.provider_id} className="platz-card" onClick={() => handleCardClick(p.provider_id)}>
+        <div className="platz-card-photo">
           <img src={getPhoto(p)} alt={svc?.tag_name ?? "Serviço"} loading="lazy" />
-          <div className="praca-card-photo-overlay" />
+          <div className="platz-card-photo-overlay" />
           {isNow && (
-            <div className="praca-card-badge now">
-              <div className="praca-card-badge-dot" /> Disponível agora
+            <div className="platz-card-badge now">
+              <div className="platz-card-badge-dot" /> Disponível agora
             </div>
           )}
           {isToday && !isNow && (
-            <div className="praca-card-badge today">
-              <div className="praca-card-badge-dot" /> Hoje
+            <div className="platz-card-badge today">
+              <div className="platz-card-badge-dot" /> Disponível hoje
             </div>
           )}
-          {p.verified && <div className="praca-card-verified">✓ Verificado</div>}
-          <div className="praca-card-avatar-wrap">
-            <div className="praca-card-avatar">
-              {p.avatar_url
-                ? <img src={p.avatar_url} alt={p.name} />
-                : getInitial(p.name)
-              }
+          {p.verified && <div className="platz-card-verified">✓ Verificado</div>}
+          <div className="platz-card-avatar-wrap">
+            <div className="platz-card-avatar">
+              {p.avatar_url ? <img src={p.avatar_url} alt={p.name} /> : getInitial(p.name)}
             </div>
           </div>
         </div>
-        <div className="praca-card-body">
-          <div className="praca-card-name">{p.name}</div>
-          <div className="praca-card-specialty">{svc?.tag_name ?? "Prestador de serviços"}</div>
-          <div className="praca-card-meta">
-            <div className="praca-card-rating">
+        <div className="platz-card-body">
+          <div className="platz-card-name">{p.name}</div>
+          <div className="platz-card-specialty">{svc?.tag_name ?? "Prestador de serviços"}</div>
+          <div className="platz-card-meta">
+            <div className="platz-card-rating">
               ★ {p.avg_rating > 0 ? p.avg_rating.toFixed(1) : "Novo"}
-              {p.total_reviews > 0 && <span>({p.total_reviews})</span>}
+              {p.total_reviews > 0 && <span className="platz-card-rating-count">({p.total_reviews})</span>}
             </div>
-            <div className="praca-card-distance">📍 {Number(p.distance_km).toFixed(1)} km</div>
+            <div className="platz-card-distance">📍 {Number(p.distance_km).toFixed(1)} km</div>
             {svc?.price_min != null && (
-              <div className="praca-card-price">
+              <div className="platz-card-price">
                 a partir de R$ {Number(svc.price_min).toLocaleString("pt-BR")}
               </div>
             )}
           </div>
-          <div className="praca-card-footer">
-            <div className="praca-card-cta">Ver perfil →</div>
+          <div className="platz-card-footer">
+            <div className="platz-card-cta">Ver perfil →</div>
           </div>
         </div>
       </div>
@@ -519,79 +726,135 @@ export default function PracaVirtualWeb() {
   };
 
   return (
-    <div className="praca-root">
-      {/* HEADER */}
-      <header className="praca-header">
-        <a className="praca-logo" href="/">
-          <div className="praca-logo-icon">🏪</div>
-          Platz
-        </a>
-        <nav className="praca-nav">
-          <a className="praca-nav-link" onClick={() => window.location.href = "/register-provider"}>
-            Seja prestador
-          </a>
+    <div className="platz-root">
+
+      {/* ── HEADER ── */}
+      <header className="platz-header">
+        <div className="platz-logo" onClick={() => window.location.href = "/"}>
+          <div className="platz-logo-mark">🏠</div>
+          <span className="platz-logo-name">Plat<span>z</span></span>
+        </div>
+        <nav className="platz-nav">
+          <button className="platz-nav-link" onClick={() => window.location.href = "/register-provider"}>
+            Para profissionais
+          </button>
+          <button className="platz-nav-link" onClick={() => window.location.href = "/(tabs)/search"}>
+            Buscar
+          </button>
           {user?.email === "jwedderhoff@gmail.com" && (
-            <a className="praca-nav-link" onClick={() => window.location.href = "/admin"}>
+            <button className="platz-nav-link" onClick={() => window.location.href = "/admin"}>
               Admin
-            </a>
+            </button>
           )}
-          <div
-            className="praca-avatar"
-            title={userName}
-            onClick={signOut}
-          >
-            {getInitial(userName)}
-          </div>
+          {!user ? (
+            <button className="platz-nav-cta" onClick={() => window.location.href = "/register-provider"}>
+              Cadastre-se grátis
+            </button>
+          ) : (
+            <div className="platz-avatar" title={userName} onClick={signOut}>
+              {getInitial(userName)}
+            </div>
+          )}
         </nav>
       </header>
 
-      {/* HERO */}
-      <section className="praca-hero">
-        <div className="praca-hero-badge">
-          <span></span> São Paulo · Prestadores verificados
+      {/* ── HERO ── */}
+      <section className="platz-hero">
+        <div className="platz-hero-bg" />
+        <div className="platz-hero-grid" />
+        <div className="platz-hero-badge">
+          <div className="platz-hero-badge-dot" />
+          São Paulo · {availableNow > 0 ? `${availableNow} profissionais disponíveis agora` : "Profissionais verificados"}
         </div>
         <h1>
-          Encontre o profissional<br />
-          <em>certo pra você</em>
+          O profissional certo,<br />
+          <em>na hora que você precisa</em>
         </h1>
-        <p>
-          Eletricistas, encanadores, pintores e muito mais —<br />
-          verificados, avaliados, com resposta em minutos.
+        <p className="platz-hero-sub">
+          Eletricistas, encanadores, pintores e mais — todos verificados,
+          avaliados por clientes reais e prontos para atender.
         </p>
-        <div className="praca-search-wrap">
+        <div className="platz-search-wrap">
           <input
             type="text"
-            placeholder="Qual serviço você precisa hoje?"
+            className="platz-search-input"
+            placeholder="Qual serviço você precisa? Ex: elétrica, encanamento..."
             value={search}
             onChange={(e: any) => setSearch(e.target.value)}
           />
-          <button className="praca-search-btn">Buscar</button>
+          <button className="platz-search-btn">Buscar →</button>
         </div>
-        <div className="praca-hero-stats">
-          <div className="praca-stat">
-            <strong>{providers.length > 0 ? `${providers.length}+` : "500+"}</strong>
-            <span>Prestadores</span>
+        <div className="platz-hero-trust">
+          <div className="platz-hero-trust-item">
+            <strong>🛡️</strong> Perfis verificados
           </div>
-          <div className="praca-stat-divider" />
-          <div className="praca-stat">
-            <strong>4.8★</strong>
-            <span>Média geral</span>
+          <div className="platz-trust-divider" />
+          <div className="platz-hero-trust-item">
+            <strong>⭐ 4.8</strong> média geral
           </div>
-          <div className="praca-stat-divider" />
-          <div className="praca-stat">
-            <strong>15min</strong>
-            <span>Resp. média</span>
+          <div className="platz-trust-divider" />
+          <div className="platz-hero-trust-item">
+            <strong>⚡ 15min</strong> resposta média
+          </div>
+          <div className="platz-trust-divider" />
+          <div className="platz-hero-trust-item">
+            <strong>✓ Sem taxa</strong> para contratar
           </div>
         </div>
       </section>
 
-      {/* FILTERS */}
-      <div className="praca-filters-wrap">
-        <div className="praca-filters">
+      {/* ── PILLARS ── */}
+      <div className="platz-pillars">
+        <div className="platz-pillar">
+          <div className="platz-pillar-icon purple">🔒</div>
+          <div className="platz-pillar-text">
+            <h3>Profissionais verificados</h3>
+            <p>Identidade, histórico e qualificações conferidos antes da aprovação na plataforma.</p>
+          </div>
+        </div>
+        <div className="platz-pillar">
+          <div className="platz-pillar-icon gold">⭐</div>
+          <div className="platz-pillar-text">
+            <h3>Avaliado por clientes reais</h3>
+            <p>Notas e comentários de quem já contratou. Sem avaliações pagas ou incentivadas.</p>
+          </div>
+        </div>
+        <div className="platz-pillar">
+          <div className="platz-pillar-icon green">🛡️</div>
+          <div className="platz-pillar-text">
+            <h3>Sua segurança em primeiro</h3>
+            <p>Histórico transparente, contato protegido e suporte disponível em toda contratação.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── STATS ── */}
+      <div className="platz-stats">
+        <div className="platz-stat-box">
+          <strong>{providers.length > 0 ? `${providers.length}+` : "500+"}</strong>
+          <span>Profissionais ativos</span>
+        </div>
+        <div className="platz-stat-box">
+          <strong>4.8★</strong>
+          <span>Avaliação média</span>
+        </div>
+        <div className="platz-stat-box">
+          <strong>15min</strong>
+          <span>Tempo de resposta</span>
+        </div>
+        <div className="platz-stat-box">
+          <strong>100%</strong>
+          <span>Gratuito para contratar</span>
+        </div>
+      </div>
+
+      {/* ── FILTERS ── */}
+      <div className="platz-filters-wrap">
+        <div className="platz-filters">
           {CATEGORY_FILTERS.map((f) => (
             <button
               key={String(f.id)}
-              className={`praca-filter-chip ${selectedCategory === f.id ? "active" : ""}`}
+              className={`platz-filter-chip ${selectedCategory === f.id ? "active" : ""}`}
               onClick={() => setSelectedCategory(f.id)}
             >
               {f.icon} {f.label}
@@ -600,63 +863,183 @@ export default function PracaVirtualWeb() {
         </div>
       </div>
 
-      {/* VIEW TOGGLE */}
-      <div className="praca-toggle-wrap">
+      {/* ── TOGGLE ── */}
+      <div className="platz-toggle-wrap" style={{ paddingTop: 32 }}>
         <button
-          className={`praca-view-btn ${viewMode === "carousel" ? "active" : ""}`}
+          className={`platz-view-btn ${viewMode === "carousel" ? "active" : ""}`}
           onClick={() => setViewMode("carousel")}
         >
-          ☰ Carrossel
+          ☰ Destaques
         </button>
         <button
-          className={`praca-view-btn ${viewMode === "grid" ? "active" : ""}`}
+          className={`platz-view-btn ${viewMode === "grid" ? "active" : ""}`}
           onClick={() => setViewMode("grid")}
         >
-          ⊞ Grade
+          ⊞ Ver todos
         </button>
       </div>
 
-      {/* CONTENT */}
+      {/* ── CONTENT ── */}
       {loading ? (
-        <div className="praca-loading" style={{ marginTop: 32 }}>
-          <div className="praca-spinner" />
-          <span>Buscando prestadores próximos…</span>
+        <div className="platz-loading">
+          <div className="platz-spinner" />
+          <span>Buscando profissionais próximos…</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="praca-empty" style={{ marginTop: 32 }}>
-          <div className="praca-empty-icon">🔍</div>
-          Nenhum prestador encontrado para essa busca.
+        <div className="platz-empty">
+          <div className="platz-empty-icon">🔍</div>
+          Nenhum profissional encontrado para essa busca.
         </div>
       ) : viewMode === "carousel" ? (
-        <section className="praca-section">
-          <div className="praca-section-header">
-            <h2 className="praca-section-title">✦ Destaques para você</h2>
-            <span className="praca-section-count">{featured.length} em destaque</span>
+        <section className="platz-section">
+          <div className="platz-section-header">
+            <div>
+              <div className="platz-section-title">✦ Destaques para você</div>
+              <div className="platz-section-subtitle">Selecionados com base na disponibilidade e avaliação</div>
+            </div>
+            <div className="platz-section-count">{featured.length} em destaque</div>
           </div>
-          <div className="praca-carousel" ref={featuredRef}>
+          <div className="platz-carousel" ref={featuredRef}>
             {featured.map(renderCard)}
           </div>
         </section>
       ) : (
-        <section className="praca-section">
-          <div className="praca-section-header">
-            <h2 className="praca-section-title">Todos os prestadores</h2>
-            <span className="praca-section-count">{filtered.length} prestadores</span>
+        <section className="platz-section">
+          <div className="platz-section-header">
+            <div>
+              <div className="platz-section-title">Todos os profissionais</div>
+              <div className="platz-section-subtitle">Disponíveis primeiro · ordenados por avaliação</div>
+            </div>
+            <div className="platz-section-count">{filtered.length} profissionais</div>
           </div>
-          <div className="praca-grid">
+          <div className="platz-grid">
             {gridProviders.map(renderCard)}
           </div>
         </section>
       )}
 
-      {/* FOOTER */}
-      <footer className="praca-footer">
-        <div className="praca-footer-logo">Platz · São Paulo</div>
-        <div className="praca-footer-links">
-          <a onClick={() => window.location.href = "/register-provider"}>Seja um prestador</a>
-          <a onClick={signOut}>Sair</a>
+      {/* ── HOW IT WORKS ── */}
+      <div className="platz-how">
+        <div className="platz-how-header">
+          <h2>Como funciona</h2>
+          <p>Contrate em 3 passos — sem taxa, sem complicação</p>
+        </div>
+        <div className="platz-how-steps">
+          <div className="platz-how-step">
+            <div className="platz-how-step-num">🔍</div>
+            <h3>Descreva o que precisa</h3>
+            <p>Busque pelo serviço ou use os filtros de categoria para encontrar o profissional certo.</p>
+          </div>
+          <div className="platz-how-step">
+            <div className="platz-how-step-num">📋</div>
+            <h3>Compare e escolha</h3>
+            <p>Veja avaliações, preços e disponibilidade real. Você decide com quem trabalhar.</p>
+          </div>
+          <div className="platz-how-step">
+            <div className="platz-how-step-num">✅</div>
+            <h3>Contrate com segurança</h3>
+            <p>Entre em contato direto, combine os detalhes e acompanhe o trabalho pela plataforma.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── FOR PROVIDERS ── */}
+      <div className="platz-providers-section">
+        <div className="platz-providers-inner">
+          <div className="platz-providers-left">
+            <h2>
+              Seu negócio cresce<br />
+              <em>quando você está na Platz</em>
+            </h2>
+            <p>
+              Conecte-se a clientes que já estão buscando o que você oferece.
+              Sem mensalidades ocultas — você paga apenas quando fechar negócio.
+            </p>
+            <div className="platz-providers-benefits">
+              <div className="platz-benefit">
+                <div className="platz-benefit-check">✓</div>
+                <div className="platz-benefit-text">
+                  <strong>Cadastro 100% gratuito</strong> — crie seu perfil e comece a receber contatos hoje
+                </div>
+              </div>
+              <div className="platz-benefit">
+                <div className="platz-benefit-check">✓</div>
+                <div className="platz-benefit-text">
+                  <strong>Controle total da agenda</strong> — você define horários, áreas e serviços
+                </div>
+              </div>
+              <div className="platz-benefit">
+                <div className="platz-benefit-check">✓</div>
+                <div className="platz-benefit-text">
+                  <strong>Avaliações que geram credibilidade</strong> — construa reputação e cobre mais
+                </div>
+              </div>
+              <div className="platz-benefit">
+                <div className="platz-benefit-check">✓</div>
+                <div className="platz-benefit-text">
+                  <strong>Visibilidade local</strong> — apareça para quem está perto e precisa agora
+                </div>
+              </div>
+            </div>
+            <button
+              className="platz-providers-cta"
+              onClick={() => window.location.href = "/register-provider"}
+            >
+              🚀 Quero me cadastrar como profissional
+            </button>
+          </div>
+          <div className="platz-earnings-card">
+            <h3>Potencial de ganhos</h3>
+            <div className="platz-earnings-number">R$8k</div>
+            <div className="platz-earnings-label">média mensal de profissionais ativos *</div>
+            <div className="platz-earnings-rows">
+              <div className="platz-earnings-row">
+                <span>⚡ Eletricista</span>
+                <strong>R$ 4.000 – 9.000/mês</strong>
+              </div>
+              <div className="platz-earnings-row">
+                <span>💧 Encanador</span>
+                <strong>R$ 3.500 – 8.000/mês</strong>
+              </div>
+              <div className="platz-earnings-row">
+                <span>🎨 Pintor</span>
+                <strong>R$ 3.000 – 7.000/mês</strong>
+              </div>
+              <div className="platz-earnings-row">
+                <span>🪵 Marceneiro</span>
+                <strong>R$ 4.500 – 10.000/mês</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── FOOTER ── */}
+      <footer className="platz-footer">
+        <div className="platz-footer-inner">
+          <div>
+            <div className="platz-footer-brand">Plat<span>z</span> · São Paulo</div>
+            <div className="platz-footer-tagline">Profissionais verificados, contratação segura.</div>
+          </div>
+          <div className="platz-footer-links">
+            <button className="platz-footer-link" onClick={() => window.location.href = "/register-provider"}>
+              Seja um profissional
+            </button>
+            <button className="platz-footer-link" onClick={() => window.location.href = "/(tabs)/search"}>
+              Buscar serviços
+            </button>
+            {user && (
+              <button className="platz-footer-link" onClick={signOut}>
+                Sair
+              </button>
+            )}
+          </div>
+          <div className="platz-footer-copy">
+            * Valores estimados com base em profissionais ativos na plataforma.
+          </div>
         </div>
       </footer>
+
     </div>
   );
 }
