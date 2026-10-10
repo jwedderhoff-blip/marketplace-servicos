@@ -302,15 +302,21 @@ BEGIN
     )::double precision,
     pp.portfolio_photos,
     COALESCE(
-      jsonb_agg(
-        jsonb_build_object(
-          'tag_id', t.id,
-          'tag_name', t.name,
-          'tag_slug', t.slug,
-          'price_min', ps.price_range_min,
-          'price_max', ps.price_range_max
-        )
-      ) FILTER (WHERE t.id IS NOT NULL),
+      (
+        SELECT jsonb_agg(svc ORDER BY svc->>'tag_name')
+        FROM (
+          SELECT DISTINCT jsonb_build_object(
+            'tag_id', t2.id,
+            'tag_name', t2.name,
+            'tag_slug', t2.slug,
+            'price_min', ps2.price_range_min,
+            'price_max', ps2.price_range_max
+          ) AS svc
+          FROM provider_services ps2
+          JOIN tags t2 ON t2.id = ps2.tag_id
+          WHERE ps2.provider_id = pp.id
+        ) sub
+      ),
       '[]'::jsonb
     )
   FROM provider_profiles pp
@@ -333,3 +339,5 @@ BEGIN
   LIMIT result_limit;
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION find_providers_nearby(double precision, double precision, int, availability_status, uuid, int) TO anon, authenticated;
