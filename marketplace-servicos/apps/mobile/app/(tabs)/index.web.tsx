@@ -34,8 +34,12 @@ const CSS = `
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Expo Web sets body/html overflow:hidden — make root the scroll container */
+html, body { overflow: hidden !important; height: 100%; }
+
 .praca-root {
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background: #080613;
   color: #EDE9F8;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;

@@ -5,8 +5,9 @@ import { useAuth } from "../../hooks/useAuth";
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow: hidden !important; height: 100%; }
 .profile-root {
-  min-height: 100vh; background: #080613; color: #EDE9F8;
+  height: 100vh; overflow-y: auto; background: #080613; color: #EDE9F8;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
