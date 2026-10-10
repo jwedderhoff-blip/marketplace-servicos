@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Admin — Marketplace de Serviços",
-  description: "Painel administrativo",
+  title: "Platz — Serviços locais, quando você precisar",
+  description:
+    "Encontre eletricistas, encanadores, pintores e muito mais perto de você. Avaliações reais, resposta em minutos.",
 };
 
 export default function RootLayout({
@@ -13,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className="bg-gray-50 min-h-screen">{children}</body>
+      <body style={{ margin: 0, padding: 0, background: "#0A0612" }}>{children}</body>
     </html>
   );
 }
