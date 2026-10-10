@@ -41,6 +41,8 @@ export default function PracaVirtualScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+  const [featured, setFeatured] = useState<ProviderNearby[]>([]);
 
   // Supabase Realtime — atualiza status de disponibilidade sem polling
   useEffect(() => {
@@ -99,14 +101,12 @@ export default function PracaVirtualScreen() {
     loadProviders();
   };
 
-  // Seções da praça
-  const availableNow = providers.filter(
-    (p) => p.availability_status === "available_now"
-  );
-  const topRated = [...providers]
-    .sort((a, b) => b.avg_rating - a.avg_rating)
-    .slice(0, 8);
-  const newest = providers.slice(-6).reverse();
+  // Embaralha os prestadores para o carrossel de destaques ao carregar
+  useEffect(() => {
+    if (providers.length === 0) return;
+    const shuffled = [...providers].sort(() => Math.random() - 0.5);
+    setFeatured(shuffled.slice(0, 8));
+  }, [providers]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -126,8 +126,20 @@ export default function PracaVirtualScreen() {
                 : "Buscando prestadores..."}
             </Text>
           </View>
-          <View style={styles.headerBadge}>
-            <Text style={styles.headerBadgeText}>📍 SP</Text>
+          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+            <TouchableOpacity
+              style={styles.viewToggle}
+              onPress={() =>
+                setViewMode((v) => (v === "carousel" ? "grid" : "carousel"))
+              }
+            >
+              <Text style={styles.viewToggleText}>
+                {viewMode === "carousel" ? "⊞" : "☰"}
+              </Text>
+            </TouchableOpacity>
+            <View style={styles.headerBadge}>
+              <Text style={styles.headerBadgeText}>📍 SP</Text>
+            </View>
           </View>
         </View>
 
@@ -196,26 +208,30 @@ export default function PracaVirtualScreen() {
               Tente ampliar o raio de busca ou remover filtros
             </Text>
           </View>
+        ) : viewMode === "grid" ? (
+          <>
+            <View style={styles.gridHeader}>
+              <Text style={styles.sectionTitle}>Todos os prestadores</Text>
+              <Text style={styles.gridCount}>{providers.length} encontrados</Text>
+            </View>
+            <View style={styles.gridContainer}>
+              {providers.map((p) => (
+                <ProviderCard
+                  key={p.provider_id}
+                  provider={p}
+                  onPress={() => router.push(`/provider/${p.provider_id}`)}
+                />
+              ))}
+            </View>
+            <View style={{ height: 32 }} />
+          </>
         ) : (
           <>
-            {/* Disponíveis agora */}
-            {availableNow.length > 0 && (
-              <Section
-                title="✦ Disponíveis agora perto de você"
-                providers={availableNow}
-              />
-            )}
-
-            {/* Mais bem avaliados */}
-            {topRated.length > 0 && (
-              <Section title="⭐ Mais bem avaliados" providers={topRated} />
-            )}
-
-            {/* Novos na praça */}
-            {newest.length > 0 && (
-              <Section title="🆕 Novos no Platz" providers={newest} />
-            )}
-
+            {/* Carrossel de destaques aleatórios */}
+            <Section
+              title="✦ Destaques para você"
+              providers={featured}
+            />
             <View style={{ height: 32 }} />
           </>
         )}
@@ -231,15 +247,35 @@ function Section({
   title: string;
   providers: ProviderNearby[];
 }) {
+  const flatListRef = useRef<FlatList<ProviderNearby>>(null);
+  const currentIndex = useRef(0);
+
+  useEffect(() => {
+    if (providers.length <= 1) return;
+    const id = setInterval(() => {
+      currentIndex.current = (currentIndex.current + 1) % providers.length;
+      flatListRef.current?.scrollToIndex({
+        index: currentIndex.current,
+        animated: true,
+      });
+    }, 3000);
+    return () => clearInterval(id);
+  }, [providers.length]);
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <FlatList
+        ref={flatListRef}
         data={providers}
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.provider_id}
         contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+        onScrollToIndexFailed={() => {
+          currentIndex.current = 0;
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }}
         renderItem={({ item }) => (
           <ProviderCard
             provider={item}
@@ -367,5 +403,37 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
+  },
+  viewToggle: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  viewToggleText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "700",
+  },
+  gridHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  gridCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 12,
+    gap: 12,
+    justifyContent: "center",
   },
 });
