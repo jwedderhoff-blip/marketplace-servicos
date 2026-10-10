@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../hooks/useAuth";
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -155,6 +156,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function ProviderProfileWeb() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
   const [provider, setProvider] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -162,6 +164,7 @@ export default function ProviderProfileWeb() {
   const [scheduledFor, setScheduledFor] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -184,16 +187,17 @@ export default function ProviderProfileWeb() {
   const handleSubmit = async () => {
     if (!description.trim()) return;
     setSubmitting(true);
+    setSubmitError(null);
     const { error } = await supabase.rpc("create_service_request", {
       p_provider_id: id,
       p_description: description.trim(),
-      p_scheduled_for: scheduledFor || null,
+      p_scheduled_for: scheduledFor || undefined,
     });
     setSubmitting(false);
     if (!error) {
       setSubmitted(true);
     } else {
-      alert("Erro ao enviar solicitação. Verifique se está logado.");
+      setSubmitError(error.message ?? "Erro ao enviar. Tente novamente.");
     }
   };
 
@@ -254,7 +258,10 @@ export default function ProviderProfileWeb() {
           <button
             className="prov-cta"
             disabled={status === "unavailable"}
-            onClick={() => { setSubmitted(false); setDescription(""); setScheduledFor(""); setShowModal(true); }}
+            onClick={() => {
+              if (!user) { window.location.href = "/login"; return; }
+              setSubmitted(false); setDescription(""); setScheduledFor(""); setSubmitError(null); setShowModal(true);
+            }}
           >
             {status === "unavailable" ? "Indisponível" : "Solicitar serviço"}
           </button>
@@ -355,6 +362,9 @@ export default function ProviderProfileWeb() {
                   onChange={(e: any) => setScheduledFor(e.target.value)}
                 />
 
+                {submitError && (
+                  <p style={{ color: "#F87171", fontSize: 13, marginBottom: 12 }}>⚠ {submitError}</p>
+                )}
                 <div className="modal-actions">
                   <button className="modal-btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
                   <button
