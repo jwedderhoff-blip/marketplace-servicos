@@ -34,8 +34,12 @@ const CSS = `
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Expo Web sets body/html overflow:hidden — make root the scroll container */
+html, body { overflow: hidden !important; height: 100%; }
+
 .praca-root {
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background: #080613;
   color: #EDE9F8;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -391,7 +395,7 @@ export default function PracaVirtualWeb() {
       <header className="praca-header">
         <a className="praca-logo" href="/">
           <div className="praca-logo-icon">🏪</div>
-          Praça<span>Hub</span>
+          Platz
         </a>
         <nav className="praca-nav">
           <a className="praca-nav-link" onClick={() => window.location.href = "/register-provider"}>
@@ -554,7 +558,7 @@ export default function PracaVirtualWeb() {
 
       {/* FOOTER */}
       <footer className="praca-footer">
-        <div className="praca-footer-logo">Praça<span>Hub</span> · São Paulo</div>
+        <div className="praca-footer-logo">Platz · São Paulo</div>
         <div className="praca-footer-links">
           <a onClick={() => window.location.href = "/register-provider"}>Seja um prestador</a>
           <a onClick={signOut}>Sair</a>

@@ -131,7 +131,7 @@ export default function LoginScreen() {
               <Text style={styles.logoEmoji}>🏪</Text>
             </LinearGradient>
           </View>
-          <Text style={styles.appName}>Praça de Serviços</Text>
+          <Text style={styles.appName}>Platz</Text>
           <Text style={styles.tagline}>
             Encontre prestadores locais confiáveis{"\n"}perto de você, quando precisar.
           </Text>

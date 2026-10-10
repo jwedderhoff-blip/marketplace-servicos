@@ -231,7 +231,7 @@ export default function RegisterProviderWeb() {
     <div className="reg-root">
       {/* Left panel */}
       <aside className="reg-left">
-        <div className="reg-left-logo">Praça<span>Hub</span></div>
+        <div className="reg-left-logo">Platz</div>
         <div className="reg-left-content">
           <h2>Transforme sua habilidade em renda</h2>
           <p>
@@ -269,7 +269,7 @@ export default function RegisterProviderWeb() {
             </div>
           </div>
         </div>
-        <div style={{ fontSize: 12, color: "#4B4470" }}>© 2025 PraçaHub</div>
+        <div style={{ fontSize: 12, color: "#4B4470" }}>© 2025 Platz</div>
       </aside>
 
       {/* Right panel */}
@@ -284,7 +284,7 @@ export default function RegisterProviderWeb() {
                 e você receberá a verificação em breve.
               </p>
               <button className="reg-success-btn" onClick={() => window.location.href = "/"}>
-                Ver meu perfil na Praça →
+                Ver meu perfil →
               </button>
             </div>
           ) : (

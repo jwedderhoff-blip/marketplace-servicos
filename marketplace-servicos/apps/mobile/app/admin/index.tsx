@@ -94,13 +94,14 @@ const WEB_CSS = `
 }
 `;
 
-type Tab = "overview" | "providers" | "users";
+type Tab = "overview" | "providers" | "users" | "requests";
 
 export default function AdminScreen() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("overview");
   const [providers, setProviders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const isAdmin = user?.email === ADMIN_EMAIL;
@@ -117,11 +118,13 @@ export default function AdminScreen() {
   useEffect(() => {
     if (!isAdmin) return;
     Promise.all([
-      supabase.from("provider_profiles").select(`*, users(name, email, avatar_url)`).order("created_at", { ascending: false }),
-      supabase.from("users").select("*").order("created_at", { ascending: false }),
-    ]).then(([{ data: pData }, { data: uData }]) => {
-      setProviders(pData ?? []);
-      setUsers(uData ?? []);
+      supabase.rpc("get_admin_providers").single(),
+      supabase.rpc("get_admin_users").single(),
+      supabase.rpc("get_admin_requests").single(),
+    ]).then(([{ data: pData }, { data: uData }, { data: rData }]) => {
+      setProviders(Array.isArray(pData) ? pData : (pData ?? []));
+      setUsers(Array.isArray(uData) ? uData : (uData ?? []));
+      setRequests(Array.isArray(rData) ? rData : (rData ?? []));
       setLoading(false);
     });
   }, [isAdmin]);
@@ -148,7 +151,7 @@ export default function AdminScreen() {
           <h2>Acesso restrito</h2>
           <p>Você não tem permissão para acessar esta área.</p>
           <button className="admin-btn admin-btn-primary" onClick={() => window.location.href = "/"}>
-            ← Voltar à Praça
+            ← Platz
           </button>
         </div>
       </div>
@@ -159,17 +162,20 @@ export default function AdminScreen() {
   const verified = providers.filter((p) => p.verified).length;
   const pending = providers.filter((p) => !p.verified).length;
 
-  const NAV_ITEMS: { id: Tab; icon: string; label: string }[] = [
+  const pendingRequests = requests.filter((r) => r.status === "pending").length;
+
+  const NAV_ITEMS: { id: Tab; icon: string; label: string; badge?: number }[] = [
     { id: "overview", icon: "📊", label: "Visão Geral" },
     { id: "providers", icon: "🔧", label: "Prestadores" },
     { id: "users", icon: "👥", label: "Usuários" },
+    { id: "requests", icon: "📋", label: "Solicitações", badge: pendingRequests },
   ];
 
   return (
     <div className="admin-root">
       {/* Sidebar */}
       <aside className="admin-sidebar">
-        <div className="admin-sidebar-logo">Praça<span>Hub</span></div>
+        <div className="admin-sidebar-logo">Platz</div>
         <div className="admin-sidebar-sub">Painel Admin</div>
         <nav className="admin-sidebar-nav">
           {NAV_ITEMS.map((item) => (
@@ -178,7 +184,12 @@ export default function AdminScreen() {
               className={`admin-nav-item ${tab === item.id ? "active" : ""}`}
               onClick={() => setTab(item.id)}
             >
-              {item.icon} {item.label}
+              <span>{item.icon} {item.label}</span>
+              {item.badge ? (
+                <span style={{ marginLeft: "auto", background: "#6C3DE0", color: "#fff", borderRadius: 100, fontSize: 10, fontWeight: 800, padding: "2px 7px" }}>
+                  {item.badge}
+                </span>
+              ) : null}
             </button>
           ))}
           <div style={{ marginTop: "auto", paddingTop: 24 }}>
@@ -186,7 +197,7 @@ export default function AdminScreen() {
               className="admin-nav-item"
               onClick={() => window.location.href = "/"}
             >
-              ← Praça Virtual
+              ← Platz
             </button>
           </div>
         </nav>
@@ -199,6 +210,7 @@ export default function AdminScreen() {
             {tab === "overview" && "Visão Geral"}
             {tab === "providers" && "Prestadores"}
             {tab === "users" && "Usuários"}
+            {tab === "requests" && "Solicitações"}
           </h1>
           <div className="admin-topbar-right">
             <div className="admin-badge-dot" />
@@ -242,6 +254,14 @@ export default function AdminScreen() {
                         {pending > 0 ? "Ação necessária" : "Em dia"}
                       </div>
                     </div>
+                    <div className="admin-stat-card" style={{ cursor: "pointer" }} onClick={() => setTab("requests")}>
+                      <div className="admin-stat-icon">📋</div>
+                      <div className="admin-stat-value">{requests.length}</div>
+                      <div className="admin-stat-label">Solicitações totais</div>
+                      <div className={`admin-stat-change ${pendingRequests > 0 ? "up" : "neutral"}`}>
+                        {pendingRequests > 0 ? `${pendingRequests} pendentes` : "Nenhuma pendente"}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="admin-section-title">Últimos prestadores cadastrados</div>
@@ -253,6 +273,58 @@ export default function AdminScreen() {
                 <>
                   <div className="admin-section-title">{providers.length} prestadores no sistema</div>
                   <ProvidersTable providers={providers} onVerify={handleVerify} />
+                </>
+              )}
+
+              {tab === "requests" && (
+                <>
+                  <div className="admin-section-title">{requests.length} solicitações no sistema</div>
+                  <div className="admin-table-wrap">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Cliente</th>
+                          <th>Prestador</th>
+                          <th>Descrição</th>
+                          <th>Status</th>
+                          <th>Data preferida</th>
+                          <th>Criado em</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {requests.map((r) => (
+                          <tr key={r.id}>
+                            <td>
+                              <span className="admin-avatar-mini">{r.client_name?.charAt(0) ?? "?"}</span>
+                              {r.client_name ?? r.client_email ?? "—"}
+                            </td>
+                            <td>
+                              <span className="admin-avatar-mini">{r.provider_name?.charAt(0) ?? "?"}</span>
+                              {r.provider_name ?? "—"}
+                            </td>
+                            <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {r.description}
+                            </td>
+                            <td>
+                              <span className={`admin-status ${
+                                r.status === "pending" ? "today" :
+                                r.status === "accepted" ? "available" : "unavail"
+                              }`}>
+                                {r.status === "pending" ? "Pendente" :
+                                 r.status === "accepted" ? "Aceita" :
+                                 r.status === "completed" ? "Concluída" : r.status}
+                              </span>
+                            </td>
+                            <td>{r.scheduled_for ? new Date(r.scheduled_for).toLocaleDateString("pt-BR") : "—"}</td>
+                            <td>{new Date(r.created_at).toLocaleDateString("pt-BR")}</td>
+                          </tr>
+                        ))}
+                        {requests.length === 0 && (
+                          <tr><td colSpan={6} style={{ textAlign: "center", padding: 40, color: "#4B4470" }}>Nenhuma solicitação ainda</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </>
               )}
 
