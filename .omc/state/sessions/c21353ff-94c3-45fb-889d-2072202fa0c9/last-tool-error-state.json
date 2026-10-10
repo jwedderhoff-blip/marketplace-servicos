@@ -1,0 +1,7 @@
+{
+  "tool_name": "PowerShell",
+  "tool_input_preview": "{\"command\":\"vercel project ls 2>&1\",\"description\":\"List Vercel projects\"}",
+  "error": "Exit code 1\nvercel : O termo 'vercel' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável. \r\nVerifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.\r\nNo linha:1 caractere:302\r\n+ ... $PSStyle.OutputRendering = 'PlainText' } catch {} } }; vercel project ...\r\n+                                                            ~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (vercel:String) [], CommandNotFoun...",
+  "timestamp": "2026-10-10T14:27:22.667Z",
+  "retry_count": 1
+}

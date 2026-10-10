@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__claude-in-chrome__tabs_context_mcp",
+  "tool_input_preview": "{\"createIfEmpty\":true}",
+  "error": "Failed to query tabs: Tabs cannot be edited right now (user may be dragging a tab).",
+  "timestamp": "2026-10-10T14:09:31.458Z",
+  "retry_count": 1
+}
