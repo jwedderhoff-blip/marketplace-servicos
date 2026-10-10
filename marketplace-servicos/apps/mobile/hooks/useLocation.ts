@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Platform } from "react-native";
 import * as Location from "expo-location";
 
 export interface Coords {
@@ -12,6 +13,19 @@ export function useLocation() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Na web, resolve imediatamente sem bloquear (localização é opcional)
+    if (Platform.OS === "web") {
+      setLoading(false);
+      if (typeof navigator !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => setError("Localização não disponível"),
+          { timeout: 5000 }
+        );
+      }
+      return;
+    }
+
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {

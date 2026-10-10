@@ -11,9 +11,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
-import { useLocation } from "../../hooks/useLocation";
+// import { useLocation } from "../../hooks/useLocation"; // desabilitado para testes web
 import { Colors } from "../../constants/colors";
 import type { ProviderNearby, AvailabilityStatus } from "../../lib/database.types";
 import { ProviderCard } from "../../components/ProviderCard";
@@ -31,8 +32,10 @@ const CATEGORY_FILTERS = [
   { id: "a1000000-0000-0000-0000-000000000016", label: "Reforma" },
 ];
 
+const SAO_PAULO = { lat: -23.5505, lng: -46.6333 };
+
 export default function PracaVirtualScreen() {
-  const { coords, loading: locationLoading } = useLocation();
+  // const { coords, loading: locationLoading } = useLocation(); // desabilitado para testes web
   const [providers, setProviders] = useState<ProviderNearby[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -69,12 +72,13 @@ export default function PracaVirtualScreen() {
   }, []);
 
   const loadProviders = useCallback(async () => {
-    if (!coords) return;
+    // const location = coords ?? SAO_PAULO; // reativar quando useLocation estiver habilitado
+    const location = SAO_PAULO;
 
     const { data, error } = await supabase.rpc("find_providers_nearby", {
-      lat: coords.lat,
-      lng: coords.lng,
-      radius_km: 15,
+      lat: location.lat,
+      lng: location.lng,
+      radius_km: 50,
       filter_category: selectedCategory,
       result_limit: 30,
     });
@@ -84,14 +88,11 @@ export default function PracaVirtualScreen() {
     }
     setLoading(false);
     setRefreshing(false);
-  }, [coords, selectedCategory]);
+  }, [selectedCategory]); // adicionar coords nas deps ao reativar useLocation
 
   useEffect(() => {
-    if (coords) {
-      setLoading(true);
-      loadProviders();
-    }
-  }, [coords, selectedCategory]);
+    loadProviders();
+  }, [selectedCategory]); // adicionar coords nas deps ao reativar useLocation
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -107,49 +108,52 @@ export default function PracaVirtualScreen() {
     .slice(0, 8);
   const newest = providers.slice(-6).reverse();
 
-  if (locationLoading) {
-    return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={styles.loadingText}>Buscando sua localização...</Text>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Praça de Serviços</Text>
-        <Text style={styles.headerSubtitle}>
-          {providers.length > 0
-            ? `${providers.length} prestadores próximos`
-            : "Carregando..."}
-        </Text>
-      </View>
-
-      {/* Barra de busca */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="O que você precisa hoje?"
-            placeholderTextColor={Colors.textDisabled}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={() => {
-              if (searchQuery.trim()) {
-                router.push({
-                  pathname: "/(tabs)/search",
-                  params: { query: searchQuery },
-                });
-              }
-            }}
-            returnKeyType="search"
-          />
+      {/* Header com gradiente */}
+      <LinearGradient
+        colors={["#3A0CA3", "#6C3DE0"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}
+      >
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Praça de Serviços</Text>
+            <Text style={styles.headerSubtitle}>
+              {providers.length > 0
+                ? `${providers.length} prestadores próximos`
+                : "Buscando prestadores..."}
+            </Text>
+          </View>
+          <View style={styles.headerBadge}>
+            <Text style={styles.headerBadgeText}>📍 SP</Text>
+          </View>
         </View>
-      </View>
+
+        {/* Barra de busca dentro do gradiente */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="O que você precisa hoje?"
+              placeholderTextColor={Colors.textDisabled}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={() => {
+                if (searchQuery.trim()) {
+                  router.push({
+                    pathname: "/(tabs)/search",
+                    params: { query: searchQuery },
+                  });
+                }
+              }}
+              returnKeyType="search"
+            />
+          </View>
+        </View>
+      </LinearGradient>
 
       {/* Filtros de categoria */}
       <ScrollView
@@ -239,12 +243,7 @@ function Section({
         renderItem={({ item }) => (
           <ProviderCard
             provider={item}
-            onPress={() =>
-              router.push({
-                pathname: "/provider/[id]",
-                params: { id: item.provider_id },
-              })
-            }
+            onPress={() => router.push(`/provider/${item.provider_id}`)}
           />
         )}
       />
@@ -268,35 +267,58 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 14,
   },
+  headerGradient: {
+    paddingBottom: 16,
+  },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 12,
     paddingBottom: 12,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: Colors.text,
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    fontSize: 12,
+    color: "rgba(255,255,255,0.7)",
     marginTop: 2,
+  },
+  headerBadge: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  headerBadgeText: {
+    fontSize: 12,
+    color: "#fff",
+    fontWeight: "600",
   },
   searchContainer: {
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 0,
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingHorizontal: 12,
-    height: 48,
-    gap: 8,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 50,
+    gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
   searchIcon: {
     fontSize: 16,
@@ -318,11 +340,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 17,
+    fontWeight: "800",
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: 14,
     paddingHorizontal: 16,
+    letterSpacing: -0.2,
   },
   emptyState: {
     alignItems: "center",
