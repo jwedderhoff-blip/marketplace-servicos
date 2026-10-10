@@ -16,3 +16,4 @@ ios/
 android/
 .supabase/
 supabase/.temp/
+.omc/
