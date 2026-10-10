@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd marketplace-servicos/apps/mobile && npm install --legacy-peer-deps && npx expo export --platform web",
+  "buildCommand": "cd marketplace-servicos && npm install --legacy-peer-deps && cd apps/mobile && npx expo export --platform web",
   "outputDirectory": "marketplace-servicos/apps/mobile/dist",
   "framework": null,
   "rewrites": [
