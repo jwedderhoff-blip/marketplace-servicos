@@ -41,7 +41,8 @@ export default function PracaVirtualScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"sections" | "grid">("sections");
+  const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+  const [featured, setFeatured] = useState<ProviderNearby[]>([]);
 
   // Supabase Realtime — atualiza status de disponibilidade sem polling
   useEffect(() => {
@@ -100,14 +101,12 @@ export default function PracaVirtualScreen() {
     loadProviders();
   };
 
-  // Seções da praça
-  const availableNow = providers.filter(
-    (p) => p.availability_status === "available_now"
-  );
-  const topRated = [...providers]
-    .sort((a, b) => b.avg_rating - a.avg_rating)
-    .slice(0, 8);
-  const newest = providers.slice(-6).reverse();
+  // Embaralha os prestadores para o carrossel de destaques ao carregar
+  useEffect(() => {
+    if (providers.length === 0) return;
+    const shuffled = [...providers].sort(() => Math.random() - 0.5);
+    setFeatured(shuffled.slice(0, 8));
+  }, [providers]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -131,11 +130,11 @@ export default function PracaVirtualScreen() {
             <TouchableOpacity
               style={styles.viewToggle}
               onPress={() =>
-                setViewMode((v) => (v === "sections" ? "grid" : "sections"))
+                setViewMode((v) => (v === "carousel" ? "grid" : "carousel"))
               }
             >
               <Text style={styles.viewToggleText}>
-                {viewMode === "sections" ? "⊞" : "☰"}
+                {viewMode === "carousel" ? "⊞" : "☰"}
               </Text>
             </TouchableOpacity>
             <View style={styles.headerBadge}>
@@ -228,24 +227,11 @@ export default function PracaVirtualScreen() {
           </>
         ) : (
           <>
-            {/* Disponíveis agora */}
-            {availableNow.length > 0 && (
-              <Section
-                title="✦ Disponíveis agora perto de você"
-                providers={availableNow}
-              />
-            )}
-
-            {/* Mais bem avaliados */}
-            {topRated.length > 0 && (
-              <Section title="⭐ Mais bem avaliados" providers={topRated} />
-            )}
-
-            {/* Novos na praça */}
-            {newest.length > 0 && (
-              <Section title="🆕 Novos no Platz" providers={newest} />
-            )}
-
+            {/* Carrossel de destaques aleatórios */}
+            <Section
+              title="✦ Destaques para você"
+              providers={featured}
+            />
             <View style={{ height: 32 }} />
           </>
         )}

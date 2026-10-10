@@ -384,10 +384,9 @@ export default function PracaVirtualWeb() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+  const [featured, setFeatured] = useState<any[]>([]);
 
-  const availableRef = useRef<HTMLDivElement>(null);
-  const topRatedRef = useRef<HTMLDivElement>(null);
-  const newestRef = useRef<HTMLDivElement>(null);
+  const featuredRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -410,31 +409,30 @@ export default function PracaVirtualWeb() {
     });
   }, [selectedCategory]);
 
-  // Auto-scroll carousels every 3 seconds
+  // Embaralha os prestadores para o carrossel de destaques ao carregar
+  useEffect(() => {
+    if (providers.length === 0) return;
+    const shuffled = [...providers].sort(() => Math.random() - 0.5);
+    setFeatured(shuffled.slice(0, 8));
+  }, [providers]);
+
+  // Auto-scroll do carrossel de destaques a cada 3 segundos
   useEffect(() => {
     if (viewMode !== "carousel" || loading) return;
+    const el = featuredRef.current;
+    if (!el) return;
     const STEP = 296; // 280px card + 16px gap
-    const makeScroller = (el: HTMLDivElement | null) => {
-      if (!el) return null;
-      return setInterval(() => {
-        const max = el.scrollWidth - el.clientWidth;
-        if (max <= 0) return;
-        if (el.scrollLeft >= max - 1) {
-          el.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          el.scrollBy({ left: STEP, behavior: "smooth" });
-        }
-      }, 3000);
-    };
-    const t1 = makeScroller(availableRef.current);
-    const t2 = makeScroller(topRatedRef.current);
-    const t3 = makeScroller(newestRef.current);
-    return () => {
-      if (t1) clearInterval(t1);
-      if (t2) clearInterval(t2);
-      if (t3) clearInterval(t3);
-    };
-  }, [viewMode, loading]);
+    const timer = setInterval(() => {
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) return;
+      if (el.scrollLeft >= max - 1) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: STEP, behavior: "smooth" });
+      }
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [viewMode, loading, featured.length]);
 
   const filtered = providers.filter((p) => {
     if (!search) return true;
@@ -446,9 +444,6 @@ export default function PracaVirtualWeb() {
     );
   });
 
-  const availableNow = filtered.filter((p) => p.availability_status === "available_now");
-  const topRated = [...filtered].sort((a, b) => b.avg_rating - a.avg_rating).slice(0, 8);
-  const newest = filtered.slice(-6).reverse();
   const gridProviders = [
     ...filtered.filter((p) => p.availability_status === "available_now"),
     ...filtered.filter((p) => p.availability_status !== "available_now"),
@@ -633,43 +628,15 @@ export default function PracaVirtualWeb() {
           Nenhum prestador encontrado para essa busca.
         </div>
       ) : viewMode === "carousel" ? (
-        <>
-          {availableNow.length > 0 && (
-            <section className="praca-section">
-              <div className="praca-section-header">
-                <h2 className="praca-section-title">✦ Disponíveis agora</h2>
-                <span className="praca-section-count">{availableNow.length} prestadores</span>
-              </div>
-              <div className="praca-carousel" ref={availableRef}>
-                {availableNow.map(renderCard)}
-              </div>
-            </section>
-          )}
-
-          {topRated.length > 0 && (
-            <section className="praca-section">
-              <div className="praca-section-header">
-                <h2 className="praca-section-title">⭐ Mais bem avaliados</h2>
-                <span className="praca-section-count">{topRated.length} prestadores</span>
-              </div>
-              <div className="praca-carousel" ref={topRatedRef}>
-                {topRated.map(renderCard)}
-              </div>
-            </section>
-          )}
-
-          {newest.length > 0 && (
-            <section className="praca-section">
-              <div className="praca-section-header">
-                <h2 className="praca-section-title">🆕 Novos no Platz</h2>
-                <span className="praca-section-count">{newest.length} prestadores</span>
-              </div>
-              <div className="praca-carousel" ref={newestRef}>
-                {newest.map(renderCard)}
-              </div>
-            </section>
-          )}
-        </>
+        <section className="praca-section">
+          <div className="praca-section-header">
+            <h2 className="praca-section-title">✦ Destaques para você</h2>
+            <span className="praca-section-count">{featured.length} em destaque</span>
+          </div>
+          <div className="praca-carousel" ref={featuredRef}>
+            {featured.map(renderCard)}
+          </div>
+        </section>
       ) : (
         <section className="praca-section">
           <div className="praca-section-header">
