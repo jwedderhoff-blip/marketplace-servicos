@@ -44,7 +44,7 @@ export default function ProviderProfileScreen() {
         *,
         users (*),
         provider_services (*, tags (*)),
-        reviews!inner (*)
+        reviews (*)
       `)
       .eq("id", id)
       .single()

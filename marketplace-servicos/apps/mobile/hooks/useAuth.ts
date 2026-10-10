@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
+import { Platform } from "react-native";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+
+function getRedirectUrl(): string {
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return "marketplace://auth/callback";
+}
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -26,7 +34,7 @@ export function useAuth() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "marketplace://auth/callback",
+        redirectTo: getRedirectUrl(),
       },
     });
     return { error };

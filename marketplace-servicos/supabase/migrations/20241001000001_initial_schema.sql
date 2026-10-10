@@ -212,22 +212,20 @@ CREATE INDEX idx_reviews_reviewee ON reviews (reviewee_id);
 CREATE OR REPLACE FUNCTION update_provider_rating()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE provider_profiles pp
+  UPDATE provider_profiles
   SET
-    avg_rating    = sub.avg,
-    total_reviews = sub.cnt,
-    updated_at    = now()
-  FROM (
-    SELECT
-      AVG(r.rating)::numeric(2,1) AS avg,
-      COUNT(*)::int                AS cnt
-    FROM reviews r
-    JOIN service_requests sr ON sr.id = r.request_id
-    JOIN request_matches rm ON rm.request_id = sr.id
-    WHERE rm.provider_id = pp.id
-      AND rm.status = 'accepted'
-  ) sub
-  WHERE pp.user_id = NEW.reviewee_id;
+    avg_rating    = (
+      SELECT AVG(rating)::numeric(2,1)
+      FROM reviews
+      WHERE reviewee_id = NEW.reviewee_id
+    ),
+    total_reviews = (
+      SELECT COUNT(*)::int
+      FROM reviews
+      WHERE reviewee_id = NEW.reviewee_id
+    ),
+    updated_at = now()
+  WHERE user_id = NEW.reviewee_id;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
