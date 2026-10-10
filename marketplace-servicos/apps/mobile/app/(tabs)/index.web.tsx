@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -189,19 +189,60 @@ html, body { overflow: hidden !important; height: 100%; }
   border-color: transparent; color: #fff;
 }
 
-/* ── GRID SECTION ── */
+/* ── VIEW TOGGLE ── */
+.praca-toggle-wrap {
+  padding: 24px 48px 0;
+  display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+}
+.praca-view-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 20px;
+  background: rgba(108,61,224,0.08);
+  border: 1px solid rgba(108,61,224,0.2);
+  color: #9B8EC0; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s; font-family: inherit;
+}
+.praca-view-btn:hover { border-color: rgba(108,61,224,0.4); color: #C4B5FD; }
+.praca-view-btn.active {
+  background: linear-gradient(135deg, #6C3DE0, #8B5CF6);
+  border-color: transparent; color: #fff;
+}
+
+/* ── SECTIONS ── */
 .praca-section {
-  padding: 48px 48px 0;
+  padding: 32px 0 0;
 }
 .praca-section-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; padding: 0 48px;
 }
 .praca-section-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
 .praca-section-count { font-size: 13px; color: #6B60A0; font-weight: 500; }
+
+/* ── CAROUSEL ── */
+.praca-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  gap: 16px;
+  padding: 0 48px 20px;
+}
+.praca-carousel::-webkit-scrollbar { display: none; }
+.praca-carousel .praca-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+}
+
+/* ── GRID ── */
 .praca-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+  padding: 0 48px;
 }
 
 /* ── PROVIDER CARD ── */
@@ -327,8 +368,10 @@ html, body { overflow: hidden !important; height: 100%; }
   .praca-hero { padding: 120px 20px 60px; }
   .praca-stat-divider { display: none; }
   .praca-filters-wrap { padding: 12px 20px; }
-  .praca-section { padding: 32px 20px 0; }
-  .praca-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .praca-toggle-wrap { padding: 16px 20px 0; }
+  .praca-section-header { padding: 0 20px; }
+  .praca-carousel { padding: 0 20px 16px; }
+  .praca-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; padding: 0 20px; }
   .praca-footer { padding: 32px 20px; flex-direction: column; }
   .praca-nav .praca-nav-link { display: none; }
 }
@@ -340,6 +383,11 @@ export default function PracaVirtualWeb() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+
+  const availableRef = useRef<HTMLDivElement>(null);
+  const topRatedRef = useRef<HTMLDivElement>(null);
+  const newestRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -362,6 +410,32 @@ export default function PracaVirtualWeb() {
     });
   }, [selectedCategory]);
 
+  // Auto-scroll carousels every 3 seconds
+  useEffect(() => {
+    if (viewMode !== "carousel" || loading) return;
+    const STEP = 296; // 280px card + 16px gap
+    const makeScroller = (el: HTMLDivElement | null) => {
+      if (!el) return null;
+      return setInterval(() => {
+        const max = el.scrollWidth - el.clientWidth;
+        if (max <= 0) return;
+        if (el.scrollLeft >= max - 1) {
+          el.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          el.scrollBy({ left: STEP, behavior: "smooth" });
+        }
+      }, 3000);
+    };
+    const t1 = makeScroller(availableRef.current);
+    const t2 = makeScroller(topRatedRef.current);
+    const t3 = makeScroller(newestRef.current);
+    return () => {
+      if (t1) clearInterval(t1);
+      if (t2) clearInterval(t2);
+      if (t3) clearInterval(t3);
+    };
+  }, [viewMode, loading]);
+
   const filtered = providers.filter((p) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -371,6 +445,14 @@ export default function PracaVirtualWeb() {
       p.bio?.toLowerCase().includes(q)
     );
   });
+
+  const availableNow = filtered.filter((p) => p.availability_status === "available_now");
+  const topRated = [...filtered].sort((a, b) => b.avg_rating - a.avg_rating).slice(0, 8);
+  const newest = filtered.slice(-6).reverse();
+  const gridProviders = [
+    ...filtered.filter((p) => p.availability_status === "available_now"),
+    ...filtered.filter((p) => p.availability_status !== "available_now"),
+  ];
 
   const getPhoto = (p: any) => {
     const slug = p.services?.[0]?.tag_slug;
@@ -383,11 +465,63 @@ export default function PracaVirtualWeb() {
     window.location.href = `/provider/${providerId}`;
   };
 
-  const availableNow = filtered.filter((p) => p.availability_status === "available_now");
-  const others = filtered.filter((p) => p.availability_status !== "available_now");
-  const sorted = [...availableNow, ...others];
-
   const userName = user?.user_metadata?.full_name ?? user?.email ?? "";
+
+  const renderCard = (p: any) => {
+    const svc = p.services?.[0];
+    const isNow = p.availability_status === "available_now";
+    const isToday = p.availability_status === "available_today";
+    return (
+      <div
+        key={p.provider_id}
+        className="praca-card"
+        onClick={() => handleCardClick(p.provider_id)}
+      >
+        <div className="praca-card-photo">
+          <img src={getPhoto(p)} alt={svc?.tag_name ?? "Serviço"} loading="lazy" />
+          <div className="praca-card-photo-overlay" />
+          {isNow && (
+            <div className="praca-card-badge now">
+              <div className="praca-card-badge-dot" /> Disponível agora
+            </div>
+          )}
+          {isToday && !isNow && (
+            <div className="praca-card-badge today">
+              <div className="praca-card-badge-dot" /> Hoje
+            </div>
+          )}
+          {p.verified && <div className="praca-card-verified">✓ Verificado</div>}
+          <div className="praca-card-avatar-wrap">
+            <div className="praca-card-avatar">
+              {p.avatar_url
+                ? <img src={p.avatar_url} alt={p.name} />
+                : getInitial(p.name)
+              }
+            </div>
+          </div>
+        </div>
+        <div className="praca-card-body">
+          <div className="praca-card-name">{p.name}</div>
+          <div className="praca-card-specialty">{svc?.tag_name ?? "Prestador de serviços"}</div>
+          <div className="praca-card-meta">
+            <div className="praca-card-rating">
+              ★ {p.avg_rating > 0 ? p.avg_rating.toFixed(1) : "Novo"}
+              {p.total_reviews > 0 && <span>({p.total_reviews})</span>}
+            </div>
+            <div className="praca-card-distance">📍 {Number(p.distance_km).toFixed(1)} km</div>
+            {svc?.price_min != null && (
+              <div className="praca-card-price">
+                a partir de R$ {Number(svc.price_min).toLocaleString("pt-BR")}
+              </div>
+            )}
+          </div>
+          <div className="praca-card-footer">
+            <div className="praca-card-cta">Ver perfil →</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="praca-root">
@@ -471,90 +605,82 @@ export default function PracaVirtualWeb() {
         </div>
       </div>
 
-      {/* GRID */}
-      <section className="praca-section">
-        <div className="praca-section-header">
-          <h2 className="praca-section-title">
-            {selectedCategory ? "Filtrado" : "Disponíveis agora"}
-          </h2>
-          <span className="praca-section-count">
-            {loading ? "Carregando..." : `${sorted.length} prestadores`}
-          </span>
+      {/* VIEW TOGGLE */}
+      <div className="praca-toggle-wrap">
+        <button
+          className={`praca-view-btn ${viewMode === "carousel" ? "active" : ""}`}
+          onClick={() => setViewMode("carousel")}
+        >
+          ☰ Carrossel
+        </button>
+        <button
+          className={`praca-view-btn ${viewMode === "grid" ? "active" : ""}`}
+          onClick={() => setViewMode("grid")}
+        >
+          ⊞ Grade
+        </button>
+      </div>
+
+      {/* CONTENT */}
+      {loading ? (
+        <div className="praca-loading" style={{ marginTop: 32 }}>
+          <div className="praca-spinner" />
+          <span>Buscando prestadores próximos…</span>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="praca-empty" style={{ marginTop: 32 }}>
+          <div className="praca-empty-icon">🔍</div>
+          Nenhum prestador encontrado para essa busca.
+        </div>
+      ) : viewMode === "carousel" ? (
+        <>
+          {availableNow.length > 0 && (
+            <section className="praca-section">
+              <div className="praca-section-header">
+                <h2 className="praca-section-title">✦ Disponíveis agora</h2>
+                <span className="praca-section-count">{availableNow.length} prestadores</span>
+              </div>
+              <div className="praca-carousel" ref={availableRef}>
+                {availableNow.map(renderCard)}
+              </div>
+            </section>
+          )}
 
-        {loading ? (
-          <div className="praca-loading">
-            <div className="praca-spinner" />
-            <span>Buscando prestadores próximos…</span>
+          {topRated.length > 0 && (
+            <section className="praca-section">
+              <div className="praca-section-header">
+                <h2 className="praca-section-title">⭐ Mais bem avaliados</h2>
+                <span className="praca-section-count">{topRated.length} prestadores</span>
+              </div>
+              <div className="praca-carousel" ref={topRatedRef}>
+                {topRated.map(renderCard)}
+              </div>
+            </section>
+          )}
+
+          {newest.length > 0 && (
+            <section className="praca-section">
+              <div className="praca-section-header">
+                <h2 className="praca-section-title">🆕 Novos no Platz</h2>
+                <span className="praca-section-count">{newest.length} prestadores</span>
+              </div>
+              <div className="praca-carousel" ref={newestRef}>
+                {newest.map(renderCard)}
+              </div>
+            </section>
+          )}
+        </>
+      ) : (
+        <section className="praca-section">
+          <div className="praca-section-header">
+            <h2 className="praca-section-title">Todos os prestadores</h2>
+            <span className="praca-section-count">{filtered.length} prestadores</span>
           </div>
-        ) : sorted.length === 0 ? (
-          <div className="praca-empty">
-            <div className="praca-empty-icon">🔍</div>
-            Nenhum prestador encontrado para essa busca.
-          </div>
-        ) : (
           <div className="praca-grid">
-            {sorted.map((p) => {
-              const svc = p.services?.[0];
-              const isNow = p.availability_status === "available_now";
-              const isToday = p.availability_status === "available_today";
-              return (
-                <div
-                  key={p.provider_id}
-                  className="praca-card"
-                  onClick={() => handleCardClick(p.provider_id)}
-                >
-                  {/* Photo */}
-                  <div className="praca-card-photo">
-                    <img src={getPhoto(p)} alt={svc?.tag_name ?? "Serviço"} loading="lazy" />
-                    <div className="praca-card-photo-overlay" />
-                    {isNow && (
-                      <div className="praca-card-badge now">
-                        <div className="praca-card-badge-dot" /> Disponível agora
-                      </div>
-                    )}
-                    {isToday && !isNow && (
-                      <div className="praca-card-badge today">
-                        <div className="praca-card-badge-dot" /> Hoje
-                      </div>
-                    )}
-                    {p.verified && <div className="praca-card-verified">✓ Verificado</div>}
-                    <div className="praca-card-avatar-wrap">
-                      <div className="praca-card-avatar">
-                        {p.avatar_url
-                          ? <img src={p.avatar_url} alt={p.name} />
-                          : getInitial(p.name)
-                        }
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Body */}
-                  <div className="praca-card-body">
-                    <div className="praca-card-name">{p.name}</div>
-                    <div className="praca-card-specialty">{svc?.tag_name ?? "Prestador de serviços"}</div>
-                    <div className="praca-card-meta">
-                      <div className="praca-card-rating">
-                        ★ {p.avg_rating > 0 ? p.avg_rating.toFixed(1) : "Novo"}
-                        {p.total_reviews > 0 && <span>({p.total_reviews})</span>}
-                      </div>
-                      <div className="praca-card-distance">📍 {Number(p.distance_km).toFixed(1)} km</div>
-                      {svc?.price_min != null && (
-                        <div className="praca-card-price">
-                          a partir de R$ {Number(svc.price_min).toLocaleString("pt-BR")}
-                        </div>
-                      )}
-                    </div>
-                    <div className="praca-card-footer">
-                      <div className="praca-card-cta">Ver perfil →</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {gridProviders.map(renderCard)}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* FOOTER */}
       <footer className="praca-footer">
