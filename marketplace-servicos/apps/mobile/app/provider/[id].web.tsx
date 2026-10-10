@@ -6,6 +6,55 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow: hidden !important; height: 100%; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.modal-box {
+  background: #100C26; border: 1px solid rgba(108,61,224,0.25);
+  border-radius: 24px; padding: 36px; width: 100%; max-width: 520px;
+}
+.modal-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.modal-sub { font-size: 14px; color: #6B60A0; margin-bottom: 24px; }
+.modal-label { font-size: 13px; font-weight: 600; color: #9B8EC0; margin-bottom: 8px; display: block; }
+.modal-textarea {
+  width: 100%; min-height: 120px; resize: vertical;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(108,61,224,0.2);
+  border-radius: 12px; padding: 14px; color: #EDE9F8; font-size: 14px;
+  font-family: inherit; outline: none; transition: border-color .2s;
+  margin-bottom: 16px;
+}
+.modal-textarea:focus { border-color: rgba(108,61,224,0.5); }
+.modal-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(108,61,224,0.2);
+  border-radius: 12px; padding: 12px 14px; color: #EDE9F8; font-size: 14px;
+  font-family: inherit; outline: none; transition: border-color .2s;
+  margin-bottom: 24px;
+}
+.modal-input:focus { border-color: rgba(108,61,224,0.5); }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+.modal-btn-cancel {
+  padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  background: none; border: 1px solid rgba(108,61,224,0.2); color: #9B8EC0; cursor: pointer;
+  transition: all .15s;
+}
+.modal-btn-cancel:hover { border-color: rgba(108,61,224,0.4); color: #EDE9F8; }
+.modal-btn-submit {
+  padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, #6C3DE0, #8B5CF6); color: #fff;
+  border: none; cursor: pointer; transition: opacity .2s;
+}
+.modal-btn-submit:hover { opacity: .85; }
+.modal-btn-submit:disabled { opacity: .5; cursor: default; }
+.modal-success { text-align: center; padding: 16px 0; }
+.modal-success-icon { font-size: 48px; margin-bottom: 16px; }
+.modal-success-title { font-size: 20px; font-weight: 800; color: #10B981; margin-bottom: 8px; }
+.modal-success-text { font-size: 14px; color: #6B60A0; line-height: 1.6; }
+
 .prov-root {
   height: 100vh; overflow-y: auto; background: #080613; color: #EDE9F8;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -108,6 +157,11 @@ export default function ProviderProfileWeb() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [provider, setProvider] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [description, setDescription] = useState("");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -126,6 +180,22 @@ export default function ProviderProfileWeb() {
         setLoading(false);
       });
   }, [id]);
+
+  const handleSubmit = async () => {
+    if (!description.trim()) return;
+    setSubmitting(true);
+    const { error } = await supabase.rpc("create_service_request", {
+      p_provider_id: id,
+      p_description: description.trim(),
+      p_scheduled_for: scheduledFor || null,
+    });
+    setSubmitting(false);
+    if (!error) {
+      setSubmitted(true);
+    } else {
+      alert("Erro ao enviar solicitação. Verifique se está logado.");
+    }
+  };
 
   if (loading) {
     return <div className="prov-root"><div className="prov-loading">Carregando...</div></div>;
@@ -184,7 +254,7 @@ export default function ProviderProfileWeb() {
           <button
             className="prov-cta"
             disabled={status === "unavailable"}
-            onClick={() => alert("Funcionalidade de solicitação em breve!")}
+            onClick={() => { setSubmitted(false); setDescription(""); setScheduledFor(""); setShowModal(true); }}
           >
             {status === "unavailable" ? "Indisponível" : "Solicitar serviço"}
           </button>
@@ -247,6 +317,59 @@ export default function ProviderProfileWeb() {
           </div>
         )}
       </div>
+
+      {/* Modal de solicitação */}
+      {showModal && (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
+          <div className="modal-box">
+            {submitted ? (
+              <div className="modal-success">
+                <div className="modal-success-icon">✅</div>
+                <div className="modal-success-title">Solicitação enviada!</div>
+                <p className="modal-success-text">
+                  Sua solicitação foi enviada para <strong>{provider.name}</strong>.<br />
+                  Aguarde o retorno do prestador.
+                </p>
+                <button className="modal-btn-submit" style={{ marginTop: 24 }} onClick={() => setShowModal(false)}>
+                  Fechar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="modal-title">Solicitar serviço</div>
+                <div className="modal-sub">Enviando para {provider.name}</div>
+
+                <label className="modal-label">Descreva o que você precisa *</label>
+                <textarea
+                  className="modal-textarea"
+                  placeholder="Ex: Quero instalar um armário planejado no quarto, parede de 3m..."
+                  value={description}
+                  onChange={(e: any) => setDescription(e.target.value)}
+                />
+
+                <label className="modal-label">Data preferida (opcional)</label>
+                <input
+                  type="datetime-local"
+                  className="modal-input"
+                  value={scheduledFor}
+                  onChange={(e: any) => setScheduledFor(e.target.value)}
+                />
+
+                <div className="modal-actions">
+                  <button className="modal-btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
+                  <button
+                    className="modal-btn-submit"
+                    disabled={!description.trim() || submitting}
+                    onClick={handleSubmit}
+                  >
+                    {submitting ? "Enviando..." : "Enviar solicitação →"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -117,11 +117,11 @@ export default function AdminScreen() {
   useEffect(() => {
     if (!isAdmin) return;
     Promise.all([
-      supabase.from("provider_profiles").select(`*, users(name, email, avatar_url)`).order("created_at", { ascending: false }),
-      supabase.from("users").select("*").order("created_at", { ascending: false }),
+      supabase.rpc("get_admin_providers").single(),
+      supabase.rpc("get_admin_users").single(),
     ]).then(([{ data: pData }, { data: uData }]) => {
-      setProviders(pData ?? []);
-      setUsers(uData ?? []);
+      setProviders(Array.isArray(pData) ? pData : (pData ?? []));
+      setUsers(Array.isArray(uData) ? uData : (uData ?? []));
       setLoading(false);
     });
   }, [isAdmin]);
