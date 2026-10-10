@@ -26,7 +26,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Praça",
+          title: "Platz",
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="🏪" color={color} />
           ),

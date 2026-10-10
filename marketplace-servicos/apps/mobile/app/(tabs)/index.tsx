@@ -119,7 +119,7 @@ export default function PracaVirtualScreen() {
       >
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>Praça de Serviços</Text>
+            <Text style={styles.headerTitle}>Platz</Text>
             <Text style={styles.headerSubtitle}>
               {providers.length > 0
                 ? `${providers.length} prestadores próximos`
@@ -213,7 +213,7 @@ export default function PracaVirtualScreen() {
 
             {/* Novos na praça */}
             {newest.length > 0 && (
-              <Section title="🆕 Novos na praça" providers={newest} />
+              <Section title="🆕 Novos no Platz" providers={newest} />
             )}
 
             <View style={{ height: 32 }} />

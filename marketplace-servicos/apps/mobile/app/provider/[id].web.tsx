@@ -226,7 +226,7 @@ export default function ProviderProfileWeb() {
     <div className="prov-root">
       <nav className="prov-nav">
         <button className="prov-nav-back" onClick={() => (window.location.href = "/")}>
-          ← Praça Virtual
+          ← Platz
         </button>
       </nav>
 

@@ -162,7 +162,7 @@ export default function ProfileWeb() {
     <div className="profile-root">
       <nav className="profile-nav">
         <button className="profile-nav-back" onClick={() => window.location.href = "/"}>
-          ← Praça Virtual
+          ← Platz
         </button>
         <span style={{ color: "#2D2550" }}>|</span>
         <span className="profile-nav-title">Meu perfil</span>

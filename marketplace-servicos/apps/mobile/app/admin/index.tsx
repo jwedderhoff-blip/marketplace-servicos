@@ -151,7 +151,7 @@ export default function AdminScreen() {
           <h2>Acesso restrito</h2>
           <p>Você não tem permissão para acessar esta área.</p>
           <button className="admin-btn admin-btn-primary" onClick={() => window.location.href = "/"}>
-            ← Voltar à Praça
+            ← Platz
           </button>
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function AdminScreen() {
     <div className="admin-root">
       {/* Sidebar */}
       <aside className="admin-sidebar">
-        <div className="admin-sidebar-logo">Praça<span>Hub</span></div>
+        <div className="admin-sidebar-logo">Platz</div>
         <div className="admin-sidebar-sub">Painel Admin</div>
         <nav className="admin-sidebar-nav">
           {NAV_ITEMS.map((item) => (
@@ -197,7 +197,7 @@ export default function AdminScreen() {
               className="admin-nav-item"
               onClick={() => window.location.href = "/"}
             >
-              ← Praça Virtual
+              ← Platz
             </button>
           </div>
         </nav>

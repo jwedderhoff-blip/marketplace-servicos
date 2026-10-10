@@ -395,7 +395,7 @@ export default function PracaVirtualWeb() {
       <header className="praca-header">
         <a className="praca-logo" href="/">
           <div className="praca-logo-icon">🏪</div>
-          Praça<span>Hub</span>
+          Platz
         </a>
         <nav className="praca-nav">
           <a className="praca-nav-link" onClick={() => window.location.href = "/register-provider"}>
@@ -558,7 +558,7 @@ export default function PracaVirtualWeb() {
 
       {/* FOOTER */}
       <footer className="praca-footer">
-        <div className="praca-footer-logo">Praça<span>Hub</span> · São Paulo</div>
+        <div className="praca-footer-logo">Platz · São Paulo</div>
         <div className="praca-footer-links">
           <a onClick={() => window.location.href = "/register-provider"}>Seja um prestador</a>
           <a onClick={signOut}>Sair</a>
